@@ -12,8 +12,8 @@ choose_plan_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Тариф 3 мес. - 600 руб.")],
         [KeyboardButton(text="Тариф 6 мес. - 900 руб.(скидка 50% 🔥)")],
-        [KeyboardButton(text="Тариф 1 год - 1350 руб.(скидка 70% 🔥)")]
+        [KeyboardButton(text="Тариф 1 год - 1350 руб.(скидка 70% 🔥)")],
     ],
     resize_keyboard=True,
-    one_time_keyboard=True
+    one_time_keyboard=True,
 )

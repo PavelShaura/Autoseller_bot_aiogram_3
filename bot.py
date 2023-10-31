@@ -1,10 +1,13 @@
 import asyncio
 import logging
+from datetime import datetime, timedelta
+
 
 import betterlogging as bl
 from aiogram import Bot, Dispatcher, F
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.callback_answer import CallbackAnswerMiddleware
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from tgbot.handlers.pay import pay_router
 from tgbot.handlers.settings import settings_router
@@ -13,8 +16,7 @@ from tgbot.handlers.user import user_router
 from tgbot.middlewares.config import ConfigMiddleware
 from tgbot.middlewares.throttling import ThrottlingMiddleware
 from tgbot.services.set_bot_commands import set_default_commands
-from tgbot.services import broadcaster
-
+from tgbot.services import broadcaster, apsched
 
 logger = logging.getLogger(__name__)
 log_level = logging.INFO
@@ -51,6 +53,12 @@ async def main():
 
     bot = Bot(token=config.tg_bot.token, parse_mode="HTML")
     dp = Dispatcher(storage=storage)
+
+    sheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+    sheduler.add_job(
+        apsched.send_message_interval, trigger="interval", days=1, kwargs={"bot": bot}
+    )
+    sheduler.start()
 
     for router in [user_router, support_router, pay_router, settings_router]:
         dp.include_router(router)

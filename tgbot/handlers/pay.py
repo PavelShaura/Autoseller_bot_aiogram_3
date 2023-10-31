@@ -60,7 +60,6 @@ async def check_payment(call: CallbackQuery, state: FSMContext):
             filter={"user_id": user_id, "end_date": {"$gt": date}}
         )
         if sub:
-
             end_date: datetime = sub["end_date"]
 
             if amount == 600:

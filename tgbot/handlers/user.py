@@ -43,15 +43,19 @@ async def user_start(message: Message):
 @user_router.callback_query(F.data == "prolong")
 @user_router.message(F.text == "Оплатить")
 async def choose_plan(query: Message):
-    await query.answer(text="Выберите тариф! ⤵️ ",
-                       reply_markup=choose_plan_keyboard)
+    await query.answer(text="Выберите тариф! ⤵️ ", reply_markup=choose_plan_keyboard)
 
 
-@user_router.message(F.text.in_({"Тариф 1 год - 1350 руб.(скидка 70% 🔥)",
-                                 "Тариф 3 мес. - 600 руб.",
-                                 "Тариф 6 мес. - 900 руб.(скидка 50% 🔥)",
-                                 }),
-                     flags={"throttling_key": "payment"})
+@user_router.message(
+    F.text.in_(
+        {
+            "Тариф 1 год - 1350 руб.(скидка 70% 🔥)",
+            "Тариф 3 мес. - 600 руб.",
+            "Тариф 6 мес. - 900 руб.(скидка 50% 🔥)",
+        }
+    ),
+    flags={"throttling_key": "payment"},
+)
 async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
     user_id: int = query.from_user.id
     date: datetime = datetime.now()
@@ -69,22 +73,28 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
     print(sub_price)
     if current_price == "600":
         amount = 600
-        text = f"Оплата\n\n\n" \
-               f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n" \
-               f"Оплата банковской картой через платежную систему ЮМани.\n" \
-               f"Все платежи идут через систему Telegram, это надёжно и удобно"
+        text = (
+            f"Оплата\n\n\n"
+            f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
+            f"Оплата банковской картой через платежную систему ЮМани.\n"
+            f"Все платежи идут через систему Telegram, это надёжно и удобно"
+        )
     elif current_price == "900":
         amount = 900
-        text = f"Оплата\n\n\n" \
-               f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n" \
-               f"Оплата банковской картой через платежную систему ЮМани.\n" \
-               f"Все платежи идут через систему Telegram, это надёжно и удобно"
+        text = (
+            f"Оплата\n\n\n"
+            f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
+            f"Оплата банковской картой через платежную систему ЮМани.\n"
+            f"Все платежи идут через систему Telegram, это надёжно и удобно"
+        )
     elif current_price == "1350":
         amount = 1350
-        text = f"Оплата\n\n\n" \
-               f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n" \
-               f"Оплата банковской картой через платежную систему ЮМани.\n" \
-               f"Все платежи идут через систему Telegram, это надёжно и удобно"
+        text = (
+            f"Оплата\n\n\n"
+            f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
+            f"Оплата банковской картой через платежную систему ЮМани.\n"
+            f"Все платежи идут через систему Telegram, это надёжно и удобно"
+        )
     payment = PaymentYooMoney(amount=amount)
     payment.create()
 
