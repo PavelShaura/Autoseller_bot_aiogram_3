@@ -14,6 +14,7 @@ class DbConfig:
 class TgBot:
     token: str
     admin_ids: list[int]
+    channel_id: int
 
 
 @dataclass
@@ -39,6 +40,7 @@ def load_config(path: str = ".env") -> Config:
         tg_bot=TgBot(
             token=env.str("BOT_TOKEN"),
             admin_ids=env.list("ADMINS", subcast=int),
+            channel_id=env.int("CHANNEL_INFO_ID")
         ),
         db=DbConfig(
             host=env.str("DB_HOST"), port=env.int("DB_PORT"), name=env.str("DB_NAME")

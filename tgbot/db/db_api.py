@@ -9,4 +9,5 @@ db = client[config.db.name]
 users = db["users"]
 payments = db["payments"]
 subs = db["subs"]
-photos = db["photos"]
+files = db["files"]
+

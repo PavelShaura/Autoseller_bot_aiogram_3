@@ -65,3 +65,4 @@ cache/
 
 config-google.json
 tgbot/image_qr
+tgbot/client_conf_files

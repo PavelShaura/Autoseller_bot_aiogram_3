@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from tgbot.config import Config
-from tgbot.db.db_api import subs, photos, users
+from tgbot.db.db_api import subs, files, users
 from tgbot.filters.is_admin import AdminFilter
 from tgbot.keyboards.inline import answer_keyboard, cancel_keyboard, support_keyboard
 from tgbot.lexicon.lexicon_ru import LEXICON_RU
@@ -52,7 +52,7 @@ async def waiting_question(
     else:
         sub_text = "<b>Статус подписки:</b> ❌ не оплачено ❌\n"
 
-    user_data: dict = await photos.find_one({"user_id": user_id})
+    user_data: dict = await files.find_one({"user_id": user_id})
 
     photo_id = ""
     if user_data:

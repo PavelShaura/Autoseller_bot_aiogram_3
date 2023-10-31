@@ -1,12 +1,15 @@
 from datetime import datetime
 from typing import Optional
+import os
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile
 
-from tgbot.db.db_api import subs, photos
+from tgbot.db.db_api import subs, files
 from tgbot.keyboards.inline import show_qr_keyboard, support_keyboard
+from tgbot.keyboards.reply import menu_keyboard
 from tgbot.lexicon.lexicon_ru import LEXICON_RU
+from tgbot.services.get_image import get_next_conf_filename
 
 settings_router = Router()
 
@@ -27,19 +30,47 @@ async def choose_os(call: CallbackQuery):
         return
 
     data: list[str] = call.data.split(":")
-    os: str = data[1]
-    print(os)
-    if os in ["iphone", "android"]:
+    _os: str = data[1]
+    if _os in ["iphone", "android"]:
         await call.message.edit_text(
             text=LEXICON_RU["mobile_support"],
             reply_markup=show_qr_keyboard,
         )
-    elif os in ["macos", "windows"]:
-        await call.message.edit_text(
-            text=LEXICON_RU["desc_support"],
-            reply_markup=support_keyboard,
-        )
+    elif _os in ["macos", "windows"]:
+        user_data: dict = await files.find_one({"user_id": user_id})
 
+        if user_data:
+            file_id: str = user_data.get("file_id")
+
+            await call.message.answer_document(
+                document=file_id,
+                caption="Фаш файл конфигурации",
+                reply_markup=menu_keyboard)
+        else:
+            file_path = ""
+            async for file in get_next_conf_filename():
+                file_path = file
+                break
+
+            if not os.path.exists(file_path):
+                await call.message.answer(
+                    text="file exists",
+                    reply_markup=support_keyboard,
+                )
+                return
+
+            file_from_pc: FSInputFile = FSInputFile(file_path)
+
+            conf_result = await call.message.answer_document(
+                document=file_from_pc,
+                caption="Фаш файл конфигурации",
+                reply_markup=menu_keyboard)
+
+            update_result = await files.update_one(
+                filter={"user_id": user_id},
+                update={"$set": {"file_id": conf_result.document.file_id}},
+            )
+            os.remove(file_path)
 
 @settings_router.callback_query(F.data.contains("show_qr"))
 async def show_qr(call: CallbackQuery):
@@ -50,7 +81,7 @@ async def show_qr(call: CallbackQuery):
         filter={"user_id": user_id, "end_date": {"$gt": date}}
     )
 
-    user_data: Optional[dict] = await photos.find_one({"user_id": user_id})
+    user_data: Optional[dict] = await files.find_one({"user_id": user_id})
 
     if not sub:
         await call.answer(text=LEXICON_RU["not_sub"], show_alert=True)

@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from datetime import datetime, timedelta
 
 
 import betterlogging as bl
@@ -15,6 +14,7 @@ from tgbot.handlers.support import support_router
 from tgbot.handlers.user import user_router
 from tgbot.middlewares.config import ConfigMiddleware
 from tgbot.middlewares.throttling import ThrottlingMiddleware
+from tgbot.middlewares.schedulermiddleware import SchedulerMiddleware
 from tgbot.services.set_bot_commands import set_default_commands
 from tgbot.services import broadcaster, apsched
 
@@ -54,11 +54,16 @@ async def main():
     bot = Bot(token=config.tg_bot.token, parse_mode="HTML")
     dp = Dispatcher(storage=storage)
 
-    sheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    sheduler.add_job(
-        apsched.send_message_interval, trigger="interval", days=1, kwargs={"bot": bot}
+    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+    scheduler.add_job(
+        apsched.send_message_interval, trigger="interval", hours=5, kwargs={"bot": bot}
     )
-    sheduler.start()
+    scheduler.add_job(
+        apsched.send_admin_end_date, trigger="interval", hours=5, kwargs={"bot": bot}
+    )
+    scheduler.start()
+
+    dp.update.middleware.register(SchedulerMiddleware(scheduler))
 
     for router in [user_router, support_router, pay_router, settings_router]:
         dp.include_router(router)
