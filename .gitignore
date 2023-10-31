@@ -63,6 +63,6 @@ venv.bak/
 .env
 cache/
 
-config-google.json
-tgbot/image_qr
+tgbot/images_qr
+
 tgbot/client_conf_files
