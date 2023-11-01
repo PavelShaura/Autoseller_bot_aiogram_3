@@ -9,7 +9,6 @@ from tgbot.db.db_api import subs, files
 from tgbot.keyboards.inline import show_qr_keyboard, support_keyboard
 from tgbot.keyboards.reply import menu_keyboard
 from tgbot.lexicon.lexicon_ru import LEXICON_RU
-from tgbot.services.get_image import get_next_conf_filename
 
 settings_router = Router()
 
