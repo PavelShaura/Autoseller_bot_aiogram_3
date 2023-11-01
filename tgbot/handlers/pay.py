@@ -90,14 +90,15 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
             end_date_str: str = sub["end_date"].strftime("%d.%m.%Y")
 
             image_filename = ""
-            client_id = ""
-
+            client_id = None
+            pk = None
             async for image in get_next_image_filename():
                 image_filename = image
                 break
 
             try:
-                client_id = "Client_№" + image_filename.split('/')[2].split('.')[0]
+                pk = image_filename.split('/')[2].split('.')[0]
+                client_id = "Client_№" + pk
             except Exception:
                 pass
 
@@ -123,7 +124,10 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
             os.remove(image_filename)
 
             await files.update_one(
-                {"user_id": user_id}, {"$set": {"photo_id": result.photo[-1].file_id}}
+                {"user_id": user_id},
+                {"$set": {"photo_id": result.photo[-1].file_id,
+                          "pk": pk}
+                 }
             )
             update_sub = await subs.update_one(
                 filter={"user_id": user_id, "end_date": {"$gt": date}},
@@ -154,13 +158,15 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
             end_date_str: str = end_date.strftime("%d.%m.%Y")
 
             image_filename = ""
-            client_id = ""
-
+            client_id = None
+            pk = None
             async for image in get_next_image_filename():
                 image_filename = image
                 break
+
             try:
-                client_id = "Client_№" + image_filename.split('/')[2].split('.')[0]
+                pk = image_filename.split('/')[2].split('.')[0]
+                client_id = "Client_№" + pk
             except Exception:
                 pass
             if not os.path.exists(image_filename):
@@ -181,7 +187,9 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
             )
 
             await files.insert_one(
-                {"user_id": user_id, "photo_id": result.photo[-1].file_id}
+                {"user_id": user_id,
+                 "photo_id": result.photo[-1].file_id,
+                 "pk": pk}
             )
             update_sub = await subs.update_one(
                 filter={"user_id": user_id, "end_date": {"$gt": date}},

@@ -37,40 +37,33 @@ async def choose_os(call: CallbackQuery):
             reply_markup=show_qr_keyboard,
         )
     elif _os in ["macos", "windows"]:
+
         user_data: dict = await files.find_one({"user_id": user_id})
+        pk: str = user_data.get("pk")
 
-        if user_data:
-            file_id: str = user_data.get("file_id")
+        file_path = f"tgbot/client_conf_files/{pk}.conf"
 
-            await call.message.answer_document(
-                document=file_id,
-                caption="Фаш файл конфигурации",
-                reply_markup=menu_keyboard)
-        else:
-            file_path = ""
-            async for file in get_next_conf_filename():
-                file_path = file
-                break
-
-            if not os.path.exists(file_path):
-                await call.message.answer(
-                    text="file exists",
-                    reply_markup=support_keyboard,
-                )
-                return
-
-            file_from_pc: FSInputFile = FSInputFile(file_path)
-
-            conf_result = await call.message.answer_document(
-                document=file_from_pc,
-                caption="Фаш файл конфигурации",
-                reply_markup=menu_keyboard)
-
-            update_result = await files.update_one(
-                filter={"user_id": user_id},
-                update={"$set": {"file_id": conf_result.document.file_id}},
+        if not os.path.exists(file_path):
+            await call.message.answer(
+                text="Файл не найден, обратитесь к администратору",
+                reply_markup=support_keyboard,
             )
-            os.remove(file_path)
+            return
+
+        file_from_pc: FSInputFile = FSInputFile(file_path)
+
+        conf_result = await call.message.answer_document(
+            document=file_from_pc,
+            caption="Фаш файл конфигурации",
+            reply_markup=menu_keyboard)
+
+        await files.update_one(
+            filter={"user_id": user_id},
+            update={"$set": {"file_id": conf_result.document.file_id}},
+        )
+
+
+
 
 @settings_router.callback_query(F.data.contains("show_qr"))
 async def show_qr(call: CallbackQuery):
