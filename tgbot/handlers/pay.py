@@ -10,7 +10,7 @@ from pymongo import ReturnDocument
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from tgbot.config import config
-from tgbot.db.db_api import payments, subs, files
+from tgbot.db.db_api import payments, subs, files, trial
 from tgbot.lexicon.lexicon_ru import LEXICON_RU
 from tgbot.services.get_image import get_next_image_filename
 from tgbot.services.yoomoney_api import PaymentYooMoney, NoPaymentFound
@@ -24,9 +24,11 @@ pay_router = Router()
 @pay_router.callback_query(
     F.data.contains("check_payment"),
     StateFilter("check_payment"),
-    flags={"throttling_key": "callback"}
+    flags={"throttling_key": "callback"},
 )
-async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apscheduler: AsyncIOScheduler):
+async def check_payment(
+    call: CallbackQuery, bot: Bot, state: FSMContext, apscheduler: AsyncIOScheduler
+):
     user = call.from_user.full_name
     username = call.from_user.username
     user_id: int = call.from_user.id
@@ -50,15 +52,32 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
     except NoPaymentFound:
         await call.answer("Оплата не найдена, сначала выполните оплату.")
     else:
-
-        apscheduler.add_job(send_message_pay, trigger='date', run_date=datetime.now() + timedelta(seconds=5),
-                            kwargs={'bot': bot,
-                                    'chat_id': config.tg_bot.channel_id,
-                                    "amount": amount,
-                                    "user": user,
-                                    "username": username})
-
+        apscheduler.add_job(
+            send_message_pay,
+            trigger="date",
+            run_date=datetime.now() + timedelta(seconds=5),
+            kwargs={
+                "bot": bot,
+                "chat_id": config.tg_bot.channel_id,
+                "amount": amount,
+                "user": user,
+                "username": username,
+            },
+        )
         date: datetime = datetime.now()
+
+        trials: dict = await trial.find_one(filter={"user_id": user_id})
+
+        try:
+            trial_flag = trials.get("trial_flag")
+            if trial_flag == "on":
+                await trial.update_one(
+                    filter={"user_id": user_id},
+                    update={"$set": {"trial_flag": "Utilized"}},
+                )
+        except Exception as e:
+            print(e)
+
         await payments.insert_one(
             {
                 "user_id": user_id,
@@ -97,10 +116,11 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
                 break
 
             try:
-                pk = image_filename.split('/')[2].split('.')[0]
+                pk = image_filename.split("/")[2].split(".")[0]
                 client_id = "Client_№" + pk
-            except Exception:
-                pass
+
+            except Exception as e:
+                print(e)
 
             if not os.path.exists(image_filename):
                 await call.message.answer(
@@ -118,18 +138,16 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
                 "Используйте его по истечению срока предыдущего подключения\n\n"
                 f"Общий срок действия подписки: до {end_date_str}\n\n"
                 f"Перейдите в меню настроек для подключения",
-                reply_markup=settings_keyboard
+                reply_markup=settings_keyboard,
             )
 
             os.remove(image_filename)
 
             await files.update_one(
                 {"user_id": user_id},
-                {"$set": {"photo_id": result.photo[-1].file_id,
-                          "pk": pk}
-                 }
+                {"$set": {"photo_id": result.photo[-1].file_id, "pk": pk}},
             )
-            update_sub = await subs.update_one(
+            await subs.update_one(
                 filter={"user_id": user_id, "end_date": {"$gt": date}},
                 update={"$set": {"client_id": client_id}},
             )
@@ -165,10 +183,12 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
                 break
 
             try:
-                pk = image_filename.split('/')[2].split('.')[0]
+                pk = image_filename.split("/")[2].split(".")[0]
                 client_id = "Client_№" + pk
-            except Exception:
-                pass
+
+            except Exception as e:
+                print(e)
+
             if not os.path.exists(image_filename):
                 await call.message.answer(
                     text=LEXICON_RU["empty_qr"],
@@ -187,11 +207,9 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext, apsche
             )
 
             await files.insert_one(
-                {"user_id": user_id,
-                 "photo_id": result.photo[-1].file_id,
-                 "pk": pk}
+                {"user_id": user_id, "photo_id": result.photo[-1].file_id, "pk": pk}
             )
-            update_sub = await subs.update_one(
+            await subs.update_one(
                 filter={"user_id": user_id, "end_date": {"$gt": date}},
                 update={"$set": {"client_id": client_id}},
             )

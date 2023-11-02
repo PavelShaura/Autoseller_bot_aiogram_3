@@ -10,4 +10,4 @@ users = db["users"]
 payments = db["payments"]
 subs = db["subs"]
 files = db["files"]
-
+trial = db["trial"]

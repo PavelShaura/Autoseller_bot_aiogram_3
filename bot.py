@@ -11,6 +11,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from tgbot.handlers.pay import pay_router
 from tgbot.handlers.settings import settings_router
 from tgbot.handlers.support import support_router
+from tgbot.handlers.trial import trial_router
 from tgbot.handlers.user import user_router
 from tgbot.middlewares.config import ConfigMiddleware
 from tgbot.middlewares.throttling import ThrottlingMiddleware
@@ -56,16 +57,25 @@ async def main():
 
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
     scheduler.add_job(
-        apsched.send_message_interval, trigger="interval", hours=5, kwargs={"bot": bot}
+        apsched.send_message_interval,
+        trigger="interval",
+        seconds=20,
+        kwargs={"bot": bot},
     )
     scheduler.add_job(
-        apsched.send_admin_end_date, trigger="interval", hours=5, kwargs={"bot": bot}
+        apsched.send_admin_end_date, trigger="interval", seconds=20, kwargs={"bot": bot}
     )
     scheduler.start()
 
     dp.update.middleware.register(SchedulerMiddleware(scheduler))
 
-    for router in [user_router, support_router, pay_router, settings_router]:
+    for router in [
+        user_router,
+        support_router,
+        pay_router,
+        settings_router,
+        trial_router,
+    ]:
         dp.include_router(router)
     dp.message.filter(F.chat.type == "private")
     dp.callback_query.filter(F.message.chat.type == "private")

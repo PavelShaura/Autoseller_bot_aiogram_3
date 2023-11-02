@@ -1,7 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, Optional
+import os
 
-from aiogram import Router, F, Bot
+from aiogram import Router, F
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -14,7 +16,7 @@ from tgbot.keyboards.inline import (
     support_keyboard,
     payment_keyboard,
     os_keyboard,
-    profile_keyboard,
+    settings_keyboard,
 )
 from tgbot.keyboards.reply import menu_keyboard, choose_plan_keyboard
 
@@ -40,7 +42,6 @@ async def user_start(message: Message):
         pass
 
 
-@user_router.callback_query(F.data == "prolong")
 @user_router.message(F.text == "Оплатить")
 async def choose_plan(query: Message):
     await query.answer(text="Выберите тариф! ⤵️ ", reply_markup=choose_plan_keyboard)
@@ -70,7 +71,6 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
     amount = 0
     sub_price = query.text.split()
     current_price = sub_price[4]
-    print(sub_price)
     if current_price == "600":
         amount = 600
         text = (
@@ -97,21 +97,23 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
         )
     payment = PaymentYooMoney(amount=amount)
     payment.create()
-
-    if isinstance(query, Message):
-        await query.answer(
-            text=text,
-            reply_markup=payment_keyboard(
-                payment_id=payment.id, invoice=payment.invoice
-            ),
-        )
-    else:
-        await query.message.edit_text(
-            text=text,
-            reply_markup=payment_keyboard(
-                payment_id=payment.id, invoice=payment.invoice
-            ),
-        )
+    try:
+        if isinstance(query, Message):
+            await query.answer(
+                text=text,
+                reply_markup=payment_keyboard(
+                    payment_id=payment.id, invoice=payment.invoice
+                ),
+            )
+        else:
+            await query.message.edit_text(
+                text=text,
+                reply_markup=payment_keyboard(
+                    payment_id=payment.id, invoice=payment.invoice
+                ),
+            )
+    except TelegramBadRequest:
+        pass
     await state.set_state("check_payment")
     await state.update_data(payment_id=payment.id, amount=payment.amount)
 
@@ -159,9 +161,12 @@ async def process_profile(message: Message):
     else:
         sub_text = "Статус подписки: ❌ не активирована "
 
-    text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
-
-    await message.answer(text=text, reply_markup=profile_keyboard)
+    if sub_text == "Статус подписки: ❌ не активирована ":
+        text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
+        await message.answer(text=text, reply_markup=choose_plan_keyboard)
+    else:
+        text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
+        await message.answer(text=text, reply_markup=settings_keyboard)
 
 
 @user_router.message(F.text == "Поддержка")

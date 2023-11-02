@@ -5,6 +5,7 @@ from aiogram import Bot
 from tgbot.db.db_api import subs
 from tgbot.config import config
 
+
 # Возвращает список пользователей с подпиской
 async def get_users_in_subs():
     # Получаем коллекцию с информацией о пользователях и подписках
@@ -18,6 +19,7 @@ async def get_users_in_subs():
     users = await cursor.to_list(length=None)
     return users
 
+
 async def get_clients_in_subs():
     clients_collection = subs
 
@@ -26,7 +28,6 @@ async def get_clients_in_subs():
     client = await cursor.to_list(length=None)
 
     return client
-
 
 
 # Отправляет оповещение пользователям об окончании подписки
@@ -44,7 +45,7 @@ async def send_message_interval(bot: Bot):
         # Рассчитываем, сколько дней осталось до окончания подписки
         days_left = (end_date - today).days
 
-        if 0 < days_left <= reminder_days:
+        if days_left == reminder_days:
             message = f"Ваша подписка закончится через {days_left} д."
             await bot.send_message(chat_id=user_id, text=message)
 
@@ -64,8 +65,10 @@ async def send_admin_end_date(bot: Bot):
         print(days_left)
 
         if 0 < days_left <= reminder_days:
-            message = f"❌ У клиента: {client_id} заканчивается подписка. \n" \
-                      f"Остался {days_left} д."
+            message = (
+                f"❌ У клиента: {client_id} заканчивается подписка. \n"
+                f"Остался {days_left} д."
+            )
             await bot.send_message(chat_id=config.tg_bot.channel_id, text=message)
 
 

@@ -5,7 +5,7 @@ import os
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, FSInputFile
 
-from tgbot.db.db_api import subs, files
+from tgbot.db.db_api import subs, files, trial
 from tgbot.keyboards.inline import show_qr_keyboard, support_keyboard
 from tgbot.keyboards.reply import menu_keyboard
 from tgbot.lexicon.lexicon_ru import LEXICON_RU
@@ -35,13 +35,26 @@ async def choose_os(call: CallbackQuery):
             text=LEXICON_RU["mobile_support"],
             reply_markup=show_qr_keyboard,
         )
+
     elif _os in ["macos", "windows"]:
-
+        global file_path
+        file_path = ""
         user_data: dict = await files.find_one({"user_id": user_id})
-        pk: str = user_data.get("pk")
+        trials: dict = await trial.find_one(filter={"user_id": user_id})
 
-        file_path = f"tgbot/client_conf_files/{pk}.conf"
+        if trials:
+            trial_flag = trials.get("trial_flag")
+            if trial_flag == "on":
+                pk: str = user_data.get("pk")
+                file_path = f"tgbot/trial_conf_file/{pk}.conf"
+            else:
+                pk: str = user_data.get("pk")
+                file_path = f"tgbot/client_conf_files/{pk}.conf"
+        else:
+            pk: str = user_data.get("pk")
+            file_path = f"tgbot/client_conf_files/{pk}.conf"
 
+        print(file_path)
         if not os.path.exists(file_path):
             await call.message.answer(
                 text="Файл не найден, обратитесь к администратору",
@@ -53,15 +66,14 @@ async def choose_os(call: CallbackQuery):
 
         conf_result = await call.message.answer_document(
             document=file_from_pc,
-            caption="Фаш файл конфигурации",
-            reply_markup=menu_keyboard)
+            caption="Ваш файл конфигурации",
+            reply_markup=menu_keyboard,
+        )
 
         await files.update_one(
             filter={"user_id": user_id},
             update={"$set": {"file_id": conf_result.document.file_id}},
         )
-
-
 
 
 @settings_router.callback_query(F.data.contains("show_qr"))

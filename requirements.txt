@@ -6,3 +6,4 @@ motor==3.1.2
 pymongo==4.3.3
 YooMoney==0.1.0
 APScheduler~=3.10.4
+requests
