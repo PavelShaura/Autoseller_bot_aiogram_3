@@ -2,10 +2,13 @@ from datetime import datetime, timedelta
 from typing import Optional
 import os
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, FSInputFile
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from tgbot.config import config
 from tgbot.db.db_api import subs, trial, files
+from tgbot.services.apsched import send_message_trial
 
 from tgbot.services.get_trial_image import get_trial_image_filename
 
@@ -18,10 +21,13 @@ from tgbot.keyboards.reply import choose_plan_keyboard
 trial_router = Router()
 
 
-@trial_router.message(F.text.in_({"Тариф 'Trial' ⏱ (Пробный период на 1 день)"}))
-async def process_pay(query: Message):
+@trial_router.message(F.text.in_({"🔥 АКЦИЯ!!! 🔥 ⏱ Пробный период на 1 день"}))
+async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
     user_id: int = query.from_user.id
     date: datetime = datetime.now()
+
+    user = query.from_user.full_name
+    username = query.from_user.username
 
     sub: Optional[dict] = await subs.find_one(
         filter={"user_id": user_id, "end_date": {"$gt": date}}
@@ -52,7 +58,7 @@ async def process_pay(query: Message):
 
         try:
             pk = image_filename.split("/")[2].split(".")[0]
-            client_id = "Client_№" + pk + "_(trial)"
+            client_id = "Client_№" + pk + "_TRIAL"
 
         except Exception as e:
             print(e)
@@ -60,7 +66,7 @@ async def process_pay(query: Message):
         if not os.path.exists(image_filename):
             await query.answer(
                 text="Извините! Лимит на бесплатные подписки закончился 😪\n"
-                "Ждите анонса новой акции в наших соц сетях 🙈",
+                     "Ждите анонса новой акции в наших соц сетях 🙈",
                 reply_markup=support_keyboard,
             )
         else:
@@ -100,5 +106,16 @@ async def process_pay(query: Message):
             await files.insert_one(
                 {"user_id": user_id, "photo_id": result.photo[-1].file_id, "pk": pk}
             )
-
             os.remove(image_filename)
+
+            apscheduler.add_job(
+                send_message_trial,
+                trigger="date",
+                run_date=datetime.now() + timedelta(seconds=15),
+                kwargs={
+                    "bot": bot,
+                    "chat_id": config.tg_bot.channel_id,
+                    "user": user,
+                    "username": username,
+                },
+            )

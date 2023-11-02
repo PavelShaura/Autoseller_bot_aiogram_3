@@ -38,14 +38,20 @@ async def waiting_question(
     text: str = message.html_text
     user_id: int = message.from_user.id
     name: str = message.from_user.mention_html()
-
     sub: Optional[dict] = await subs.find_one(
         filter={"user_id": user_id, "end_date": {"$gt": datetime.now()}}
     )
 
     if sub:
         end_date = sub["end_date"].strftime("%d.%m.%Y")
-        sub_text = (
+        sub_flag = sub.get("client_id")
+        if len(sub_flag) > 10:
+            sub_text = (
+            "<b>Статус подписки:</b> ⏱ TRIAL ⏱\n"
+            f"<b>Срок действия:</b> до {end_date}"
+        )
+        else:
+            sub_text = (
             "<b>Статус подписки:</b> ✅ оплачено ✅\n"
             f"<b>Срок действия:</b> до {end_date}"
         )

@@ -76,3 +76,8 @@ async def send_admin_end_date(bot: Bot):
 async def send_message_pay(bot: Bot, chat_id: int, amount: int, user, username):
     text = f"📣  Супер! 🔥 Пользователь: {user}({username})👤 оплатил подписку на сумму {amount} 🅿️"
     await bot.send_message(chat_id, text=text)
+
+
+async def send_message_trial(bot: Bot, chat_id: int, user, username):
+    text = f"⏱ Пользователь: {user}({username})👤 оформил TRIAL(пробный период)"
+    await bot.send_message(chat_id, text=text)

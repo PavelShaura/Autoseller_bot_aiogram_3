@@ -66,7 +66,7 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
     )
     sub_text = ""
     if sub:
-        sub_text = "\n\n<i> ✅ У вас уже активирована подписка. При оплате подписка будет продлена. </i>"
+        sub_text = "\n\n<i> ✅ У вас уже активирована подписка. При оплате подписка будет продлена. </i> \n\n"
     text = ""
     amount = 0
     sub_price = query.text.split()
@@ -135,6 +135,7 @@ async def process_settings(query: Union[Message, CallbackQuery]):
 
     await message.answer(
         text=LEXICON_RU["yes_sub"],
+        disable_web_page_preview=True,
         reply_markup=os_keyboard,
     )
 

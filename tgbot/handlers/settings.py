@@ -31,19 +31,29 @@ async def choose_os(call: CallbackQuery):
     data: list[str] = call.data.split(":")
     _os: str = data[1]
     if _os in ["iphone", "android"]:
-        await call.message.edit_text(
-            text=LEXICON_RU["mobile_support"],
-            reply_markup=show_qr_keyboard,
-        )
-
+        if _os == "iphone":
+            await call.message.edit_text(
+                text=LEXICON_RU["iphone_support"],
+                disable_web_page_preview=True,
+                reply_markup=show_qr_keyboard
+            )
+        if _os == "android":
+            await call.message.edit_text(
+                text=LEXICON_RU["android_support"],
+                disable_web_page_preview=True,
+                reply_markup=show_qr_keyboard
+            )
     elif _os in ["macos", "windows"]:
+
         global file_path
         file_path = ""
+
         user_data: dict = await files.find_one({"user_id": user_id})
         trials: dict = await trial.find_one(filter={"user_id": user_id})
 
         if trials:
             trial_flag = trials.get("trial_flag")
+
             if trial_flag == "on":
                 pk: str = user_data.get("pk")
                 file_path = f"tgbot/trial_conf_file/{pk}.conf"
@@ -53,27 +63,59 @@ async def choose_os(call: CallbackQuery):
         else:
             pk: str = user_data.get("pk")
             file_path = f"tgbot/client_conf_files/{pk}.conf"
-
         print(file_path)
         if not os.path.exists(file_path):
-            await call.message.answer(
-                text="Файл не найден, обратитесь к администратору",
-                reply_markup=support_keyboard,
+            try:
+                file_id = user_data.get("file_id")
+                if _os == "macos":
+                    await call.message.answer_document(
+                        document=file_id,
+                        caption=LEXICON_RU["macos_support"],
+                        disable_web_page_preview=True,
+                        reply_markup=menu_keyboard
+                    )
+                elif _os == "windows":
+                    await call.message.answer_document(
+                        document=file_id,
+                        caption=LEXICON_RU["windows_support"],
+                        disable_web_page_preview=True,
+                        reply_markup=menu_keyboard
+                    )
+                else:
+                    await call.message.answer(
+                        text="Файл не найден, обратитесь к администратору",
+                        reply_markup=support_keyboard,
+                    )
+                    return
+            except Exception as e:
+                print(e)
+        else:
+            file_from_pc: FSInputFile = FSInputFile(file_path)
+
+            conf_result = ''
+            print(file_path)
+            if _os == "macos":
+                conf_result = await call.message.answer_document(
+                    document=file_from_pc,
+                    caption=LEXICON_RU["macos_support"],
+                    disable_web_page_preview=True,
+                    reply_markup=menu_keyboard
+                )
+
+            if _os == "windows":
+                conf_result = await call.message.answer_document(
+                    document=file_from_pc,
+                    caption=LEXICON_RU["windows_support"],
+                    disable_web_page_preview=True,
+                    reply_markup=menu_keyboard
+                )
+
+            await files.update_one(
+                filter={"user_id": user_id},
+                update={"$set": {"file_id": conf_result.document.file_id}},
             )
-            return
 
-        file_from_pc: FSInputFile = FSInputFile(file_path)
-
-        conf_result = await call.message.answer_document(
-            document=file_from_pc,
-            caption="Ваш файл конфигурации",
-            reply_markup=menu_keyboard,
-        )
-
-        await files.update_one(
-            filter={"user_id": user_id},
-            update={"$set": {"file_id": conf_result.document.file_id}},
-        )
+            os.remove(file_path)
 
 
 @settings_router.callback_query(F.data.contains("show_qr"))
