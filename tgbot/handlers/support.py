@@ -45,15 +45,18 @@ async def waiting_question(
     if sub:
         end_date = sub["end_date"].strftime("%d.%m.%Y")
         sub_flag = sub.get("client_id")
+        client_id = sub.get("client_id")
         if len(sub_flag) > 10:
             sub_text = (
             "<b>Статус подписки:</b> ⏱ TRIAL ⏱\n"
-            f"<b>Срок действия:</b> до {end_date}"
+            f"<b>Срок действия:</b> до {end_date}\n\n"
+            f"<b>CLIENT_ID в GUI</b>: {client_id}"
         )
         else:
             sub_text = (
             "<b>Статус подписки:</b> ✅ оплачено ✅\n"
-            f"<b>Срок действия:</b> до {end_date}"
+            f"<b>Срок действия:</b> до {end_date}\n\n"
+            f"<b>CLIENT_ID в GUI</b>: {client_id}"
         )
     else:
         sub_text = "<b>Статус подписки:</b> ❌ не оплачено ❌\n"

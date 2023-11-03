@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Union, Optional
-import os
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -16,7 +15,7 @@ from tgbot.keyboards.inline import (
     support_keyboard,
     payment_keyboard,
     os_keyboard,
-    settings_keyboard,
+    settings_keyboard, show_qr_keyboard,
 )
 from tgbot.keyboards.reply import menu_keyboard, choose_plan_keyboard
 
@@ -164,7 +163,7 @@ async def process_profile(message: Message):
 
     if sub_text == "Статус подписки: ❌ не активирована ":
         text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
-        await message.answer(text=text, reply_markup=choose_plan_keyboard)
+        await message.answer(text=text, reply_markup=show_qr_keyboard)
     else:
         text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
         await message.answer(text=text, reply_markup=settings_keyboard)
