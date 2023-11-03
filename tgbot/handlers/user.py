@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, Optional
+import os
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -163,10 +164,10 @@ async def process_profile(message: Message):
 
     if sub_text == "Статус подписки: ❌ не активирована ":
         text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
-        await message.answer(text=text, reply_markup=show_qr_keyboard)
+        await message.answer(text=text, reply_markup=choose_plan_keyboard)
     else:
         text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
-        await message.answer(text=text, reply_markup=settings_keyboard)
+        await message.answer(text=text, reply_markup=show_qr_keyboard)
 
 
 @user_router.message(F.text == "Поддержка")
