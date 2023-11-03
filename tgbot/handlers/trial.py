@@ -111,7 +111,7 @@ async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
             apscheduler.add_job(
                 send_message_trial,
                 trigger="date",
-                run_date=datetime.now() + timedelta(seconds=15),
+                run_date=datetime.now() + timedelta(seconds=10810),
                 kwargs={
                     "bot": bot,
                     "chat_id": config.tg_bot.channel_id,

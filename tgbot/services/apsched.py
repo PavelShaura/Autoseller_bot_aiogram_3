@@ -33,7 +33,7 @@ async def get_clients_in_subs():
 # Отправляет оповещение пользователям об окончании подписки
 async def send_message_interval(bot: Bot):
     today = datetime.now()
-    reminder_days = 2  # За сколько дней оповестить об окончании подписки
+    reminder_days = 1  # За сколько дней оповестить об окончании подписки
 
     # Получаем список пользователей из базы данных с информацией о подписках и окончании подписки
     users = await get_users_in_subs()
@@ -45,7 +45,7 @@ async def send_message_interval(bot: Bot):
         # Рассчитываем, сколько дней осталось до окончания подписки
         days_left = (end_date - today).days
 
-        if days_left == reminder_days:
+        if 0 < days_left <= reminder_days:
             message = f"Ваша подписка закончится через {days_left} д."
             await bot.send_message(chat_id=user_id, text=message)
 
@@ -53,7 +53,7 @@ async def send_message_interval(bot: Bot):
 # Отправляет оповещение c ID клиента в группу администраторов об окончании подписки
 async def send_admin_end_date(bot: Bot):
     today = datetime.now()
-    reminder_days = 2  # За сколько дней оповестить об окончании подписки
+    reminder_days = 1  # За сколько дней оповестить об окончании подписки
 
     clients = await get_clients_in_subs()
 

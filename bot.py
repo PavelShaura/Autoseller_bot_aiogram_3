@@ -65,7 +65,7 @@ async def main():
     scheduler.add_job(
         apsched.send_admin_end_date,
         trigger="interval",
-        hours=6,
+        days=1,
         kwargs={"bot": bot}
     )
     scheduler.start()

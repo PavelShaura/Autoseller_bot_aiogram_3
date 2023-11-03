@@ -45,10 +45,11 @@ async def check_payment(
 
     payment = PaymentYooMoney(id=payment_id, amount=amount)
     try:
-        if user_id in config.tg_bot.admin_ids:
-            amount = payment.__dict__["amount"]  # Заглушка для теста(admin)
-        else:
-            amount = payment.check_payment()  # Проверка оплаты
+        # Заглушка для теста(admin)
+        # if user_id in config.tg_bot.admin_ids:
+        #     amount = payment.__dict__["amount"]
+        # else:
+        amount = payment.check_payment()  # Проверка оплаты
     except NoPaymentFound:
         await call.answer("Оплата не найдена, сначала выполните оплату.")
 
@@ -101,7 +102,51 @@ async def check_payment(
 
             user_data: dict = await files.find_one({"user_id": user_id})
 
-            try:
+            sub_flag = sub.get("client_id")
+            print(sub_flag)
+            if len(sub_flag) > 10:
+                image_filename = ""
+                client_id = ""
+                pk = ""
+                async for image in get_next_image_filename():
+                    image_filename = image
+                    break
+                try:
+                    pk = image_filename.split("/")[2].split(".")[0]
+                    client_id = "Client_№" + pk
+
+                except Exception as e:
+                    print(e)
+
+                if not os.path.exists(image_filename):
+                    await call.message.answer(
+                        text=LEXICON_RU["empty_qr"],
+                        reply_markup=support_keyboard,
+                    )
+
+                image_from_pc = FSInputFile(image_filename)
+
+                result = await call.message.answer_photo(
+                    photo=image_from_pc,
+                    caption=f"✅  Оплата прошла успешно!!! \n"
+                                f"Спасибо что Вы снова с нами! "
+                                f"🤝 Ваш QR - код для подключения ⤴️ \n\n"
+                                f"Общий срок действия подписки: до {end_date_str}\n\n"
+                                f"Меню настроек для подключения ⤵️ ",
+                    reply_markup=settings_keyboard,
+                )
+
+                await files.update_one(
+                    filter={"user_id": user_id},
+                    update={"$set":{"photo_id": result.photo[-1].file_id, "pk": pk}},
+                )
+                await subs.update_one(
+                    filter={"user_id": user_id, "end_date": {"$gt": date}},
+                    update={"$set": {"client_id": client_id}},
+                )
+                os.remove(image_filename)
+                print(sub_flag)
+            else:
                 photo_id = user_data.get("photo_id")
                 if photo_id:
                     await call.message.answer_photo(
@@ -119,10 +164,6 @@ async def check_payment(
                              f"Общий срок действия подписки: до {end_date_str}\n\n",
                         reply_markup=support_keyboard,
                     )
-
-            except Exception as e:
-                print(e)
-
         else:
             await subs.delete_many(filter={"user_id": user_id})
 
@@ -191,9 +232,7 @@ async def check_payment(
         apscheduler.add_job(
             send_message_pay,
             trigger="date",
-            run_date=datetime.now() + timedelta(seconds=10805),
-            # trigger="interval",
-            # seconds=10,
+            run_date=datetime.now() + timedelta(seconds=10810),
             kwargs={
                 "bot": bot,
                 "chat_id": config.tg_bot.channel_id,
