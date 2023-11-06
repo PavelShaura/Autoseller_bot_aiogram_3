@@ -1,4 +1,4 @@
-# Telegram bot for providing information from Google Sheets (aiogram, pygsheets)
+# Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoDB
 
 ## Installation
 1. Install Python 3.x if it is not installed. [Python.org](https://www.python.org/downloads/)
