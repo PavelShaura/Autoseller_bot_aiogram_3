@@ -1,5 +1,9 @@
 # Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoDB
 
+![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/insta_vpn_screen.png)
+
+https://t.me/instaViPN_bot
+
 ## Installation
 1. Install Python 3.x if it is not installed. [Python.org](https://www.python.org/downloads/)
 
