@@ -46,10 +46,10 @@ async def check_payment(
     payment = PaymentYooMoney(id=payment_id, amount=amount)
     try:
         # Заглушка для теста(admin)
-        # if user_id in config.tg_bot.admin_ids:
-        #     amount = payment.__dict__["amount"]
-        # else:
-        amount = payment.check_payment()  # Проверка оплаты
+        if user_id in config.tg_bot.admin_ids:
+            amount = payment.__dict__["amount"]
+        else:
+            amount = payment.check_payment()  # Проверка оплаты
     except NoPaymentFound:
         await call.answer("Оплата не найдена, сначала выполните оплату.")
 
@@ -197,10 +197,9 @@ async def check_payment(
             try:
                 pk = image_filename.split("/")[2].split(".")[0]
                 client_id = "Client_№" + pk
-
             except Exception as e:
                 print(e)
-
+            print(pk)
             if not os.path.exists(image_filename):
                 await call.message.answer(
                     text=LEXICON_RU["empty_qr"],

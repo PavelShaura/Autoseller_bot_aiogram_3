@@ -30,7 +30,7 @@ async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
     username = query.from_user.username
 
     sub: Optional[dict] = await subs.find_one(
-        filter={"user_id": user_id, "end_date": {"$gt": date}}
+        filter={"user_id": user_id}
     )
 
     if sub:
@@ -43,7 +43,7 @@ async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
             )
         else:
             await query.answer(
-                text="✅ Вы уже оформили подписку\n"
+                text="✅ Вы уже оформляли подписку\n"
                 "Акция доступна только новым пользователям",
                 reply_markup=choose_plan_keyboard,
             )
@@ -70,7 +70,9 @@ async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
                 reply_markup=support_keyboard,
             )
         else:
-            end_date = date + timedelta(days=2)
+            await subs.delete_many(filter={"user_id": user_id})
+
+            end_date = date + timedelta(days=1)
 
             await trial.insert_one(
                 {
