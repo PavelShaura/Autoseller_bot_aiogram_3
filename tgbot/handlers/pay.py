@@ -83,14 +83,14 @@ async def check_payment(
         )
         if sub:
 
-            end_date: datetime = sub["end_date"]
+            subscribe_timedelta: dict = {
+                600: 90,
+                900: 180,
+                1350: 365
+            }
 
-            if amount == 600:
-                end_date += timedelta(days=90)
-            elif amount == 900:
-                end_date += timedelta(days=180)
-            elif amount == 1350:
-                end_date += timedelta(days=365)
+            end_date: datetime = sub["end_date"]
+            end_date += timedelta(days=subscribe_timedelta[amount])
 
             sub = await subs.find_one_and_update(
                 filter={"user_id": user_id, "end_date": {"$gt": date}},
@@ -103,11 +103,13 @@ async def check_payment(
             user_data: dict = await files.find_one({"user_id": user_id})
 
             sub_flag = sub.get("client_id")
-            print(sub_flag)
+
             if len(sub_flag) > 10:
+
                 image_filename = ""
                 client_id = ""
                 pk = ""
+
                 async for image in get_next_image_filename():
                     image_filename = image
                     break
@@ -167,16 +169,14 @@ async def check_payment(
         else:
             await subs.delete_many(filter={"user_id": user_id})
 
-            end_date: datetime = datetime.now()
-
-            if amount == 600:
-                end_date += timedelta(days=90)
-            elif amount == 900:
-                end_date += timedelta(days=180)
-            elif amount == 1350:
-                end_date += timedelta(days=365)
+            subscribe_timedelta: dict = {
+                600: 90,
+                900: 180,
+                1350: 365
+            }
 
             start_date: datetime = datetime.now()
+            end_date = start_date + timedelta(days=subscribe_timedelta[amount])
 
             await subs.insert_one(
                 document={

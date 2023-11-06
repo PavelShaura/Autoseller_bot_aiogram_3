@@ -78,6 +78,7 @@ async def send_message_pay(bot: Bot, chat_id: int, amount: int, user, username):
     await bot.send_message(chat_id, text=text)
 
 
-async def send_message_trial(bot: Bot, chat_id: int, user, username):
-    text = f"⏱ Пользователь: {user}({username})👤 оформил TRIAL(пробный период)"
+async def send_message_trial(bot: Bot, chat_id: int, user, username, client_id):
+    text = f"⏱ Пользователь: {user}({username})👤 оформил TRIAL(пробный период)\n" \
+           f"client_id: {client_id}"
     await bot.send_message(chat_id, text=text)
