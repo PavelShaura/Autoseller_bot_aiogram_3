@@ -25,7 +25,7 @@ https://t.me/instaViPN_bot
 ## Configuration
 
 1. Create an .env configuration file in the root directory of the project using the .env.example template.
-2. Run the file yoomoney_auth.py and get your token to access the YOOMONEY API (You'll need YOOMONEY_CLIENT_ID and YOOMONEY_REDIRECT_URL)3. Choose scopes and run code.
+2. Run the file yoomoney_auth.py and get your token to access the YOOMONEY API (You'll need YOOMONEY_CLIENT_ID and YOOMONEY_REDIRECT_URL). 
 3. Follow all steps from the program.
 4. Paste your token in YOOMONEY_TOKEN
 
