@@ -20,7 +20,7 @@
    
 ## Configuration
 
-Create an .env configuration file in the root directory of the project and specify the following environment variables:
+Create an .env configuration file in the root directory of the project using the .env.example template.
 
 
 <div id="header">
