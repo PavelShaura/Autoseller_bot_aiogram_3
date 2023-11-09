@@ -27,6 +27,7 @@ async def drop_collection_data():
     # Удалить все данные из коллекции "trial"
     await trial.delete_many({})  # Пустой фильтр {}
 
+
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(drop_collection_data())

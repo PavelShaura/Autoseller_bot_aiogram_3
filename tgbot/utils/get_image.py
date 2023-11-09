@@ -1,7 +1,7 @@
 import os
 
 # Путь к папке со штрих-кодами которые отдаются пользователю
-image_folder = "tgbot/images_qr/"
+image_folder = "tgbot/static_files/images_qr/"
 
 
 async def get_next_image_filename():

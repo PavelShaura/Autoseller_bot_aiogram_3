@@ -62,12 +62,4 @@ venv.bak/
 .idea
 .env
 cache/
-tgbot/images_qr
-tgbot/client_conf_files
-tgbot/trial_images
-
-/tgbot/trial_images/
-
-tgbot/trial_conf_file
-
-/tgbot/trial_conf_file/
+tgbot/static_files

@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Union, Optional
-import os
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -11,12 +10,12 @@ from pymongo.errors import DuplicateKeyError
 
 from tgbot.db.db_api import users, subs
 from tgbot.lexicon.lexicon_ru import LEXICON_RU
-from tgbot.services.yoomoney_api import PaymentYooMoney
+from tgbot.external_services.yoomoney_api import PaymentYooMoney
 from tgbot.keyboards.inline import (
     support_keyboard,
     payment_keyboard,
     os_keyboard,
-    settings_keyboard, show_qr_keyboard,
+    show_qr_keyboard,
 )
 from tgbot.keyboards.reply import menu_keyboard, choose_plan_keyboard
 
@@ -77,7 +76,7 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
             f"Оплата\n\n\n"
             f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
             f"Оплата банковской картой через платежную систему ЮМани.\n"
-            f"Все платежи идут через систему Telegram, это надёжно и удобно"
+            f"Это надёжно и удобно."
         )
     elif current_price == "900":
         amount = 900
@@ -85,7 +84,7 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
             f"Оплата\n\n\n"
             f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
             f"Оплата банковской картой через платежную систему ЮМани.\n"
-            f"Все платежи идут через систему Telegram, это надёжно и удобно"
+            f"Это надёжно и удобно."
         )
     elif current_price == "1350":
         amount = 1350
@@ -93,7 +92,7 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
             f"Оплата\n\n\n"
             f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
             f"Оплата банковской картой через платежную систему ЮМани.\n"
-            f"Все платежи идут через систему Telegram, это надёжно и удобно"
+            f"Это надёжно и удобно."
         )
     payment = PaymentYooMoney(amount=amount)
     payment.create()

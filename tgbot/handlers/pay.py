@@ -1,19 +1,19 @@
 from datetime import datetime, timedelta
-import os
 from typing import Optional
 
 from aiogram import Router, F, Bot
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, FSInputFile
+from aiogram.types import CallbackQuery
 from pymongo import ReturnDocument
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from tgbot.config import config
-from tgbot.db.db_api import payments, subs, files, trial
-from tgbot.lexicon.lexicon_ru import LEXICON_RU
-from tgbot.services.get_image import get_next_image_filename
-from tgbot.services.yoomoney_api import PaymentYooMoney, NoPaymentFound
+from tgbot.db.db_api import payments, subs, trial
+from tgbot.services.successful_payment_logic import (
+    process_successful_re_subscription_payment,
+)
+from tgbot.external_services.yoomoney_api import PaymentYooMoney, NoPaymentFound
 from tgbot.keyboards.inline import settings_keyboard, support_keyboard
 from tgbot.services.apsched import send_message_pay
 
@@ -27,7 +27,10 @@ pay_router = Router()
     flags={"throttling_key": "callback"},
 )
 async def check_payment(
-    call: CallbackQuery, bot: Bot, state: FSMContext, apscheduler: AsyncIOScheduler(timezone="Europe/Moscow")
+    call: CallbackQuery,
+    bot: Bot,
+    state: FSMContext,
+    apscheduler: AsyncIOScheduler(timezone="Europe/Moscow"),
 ):
     user = call.from_user.full_name
     username = call.from_user.username
@@ -54,7 +57,6 @@ async def check_payment(
         await call.answer("Оплата не найдена, сначала выполните оплату.")
 
     else:
-
         date: datetime = datetime.now()
 
         trials: dict = await trial.find_one(filter={"user_id": user_id})
@@ -81,14 +83,9 @@ async def check_payment(
         sub: dict = await subs.find_one(
             filter={"user_id": user_id, "end_date": {"$gt": date}}
         )
+        subscribe_timedelta: dict = {600: 90, 900: 180, 1350: 365}
+
         if sub:
-
-            subscribe_timedelta: dict = {
-                600: 90,
-                900: 180,
-                1350: 365
-            }
-
             end_date: datetime = sub["end_date"]
             end_date += timedelta(days=subscribe_timedelta[amount])
 
@@ -100,81 +97,11 @@ async def check_payment(
 
             end_date_str: str = sub["end_date"].strftime("%d.%m.%Y")
 
-            user_data: dict = await files.find_one({"user_id": user_id})
-
-            sub_flag = sub.get("client_id")
-
-            if len(sub_flag) > 10:
-
-                image_filename = ""
-                client_id = ""
-                pk = ""
-
-                async for image in get_next_image_filename():
-                    image_filename = image
-                    break
-                try:
-                    pk = image_filename.split("/")[2].split(".")[0]
-                    client_id = "Client_№" + pk
-
-                except Exception as e:
-                    print(e)
-
-                if not os.path.exists(image_filename):
-                    await call.message.answer(
-                        text=LEXICON_RU["empty_qr"],
-                        reply_markup=support_keyboard,
-                    )
-
-                image_from_pc = FSInputFile(image_filename)
-
-                result = await call.message.answer_photo(
-                    photo=image_from_pc,
-                    caption=f"✅  Оплата прошла успешно!!! \n"
-                                f"Спасибо что Вы снова с нами! "
-                                f"🤝 Ваш QR - код для подключения ⤴️ \n\n"
-                                f"Общий срок действия подписки: до {end_date_str}\n\n"
-                                f"Меню настроек для подключения ⤵️ ",
-                    reply_markup=settings_keyboard,
-                )
-
-                await files.update_one(
-                    filter={"user_id": user_id},
-                    update={"$set":{"photo_id": result.photo[-1].file_id, "pk": pk}},
-                )
-                await subs.update_one(
-                    filter={"user_id": user_id, "end_date": {"$gt": date}},
-                    update={"$set": {"client_id": client_id}},
-                )
-                os.remove(image_filename)
-                print(sub_flag)
-            else:
-                photo_id = user_data.get("photo_id")
-                if photo_id:
-                    await call.message.answer_photo(
-                        photo=photo_id,
-                        caption=f"✅  Оплата прошла успешно!!! \n"
-                                f"Спасибо что Вы снова с нами! 🤝 Ваш QR - код для подключения ⤴️ \n\n"
-                                f"Общий срок действия подписки: до {end_date_str}\n\n"
-                                f"Меню настроек для подключения ⤵️ ",
-                        reply_markup=settings_keyboard,
-                    )
-                else:
-                    await call.message.answer(
-                        text=f"✅  Оплата прошла успешно!!! \n"
-                             f"Спасибо что Вы снова с нами! 🤝\n\n\n"
-                             f"Общий срок действия подписки: до {end_date_str}\n\n",
-                        reply_markup=support_keyboard,
-                    )
+            await process_successful_re_subscription_payment(
+                call, end_date_str, support_keyboard, settings_keyboard
+            )
         else:
             await subs.delete_many(filter={"user_id": user_id})
-
-            subscribe_timedelta: dict = {
-                600: 90,
-                900: 180,
-                1350: 365
-            }
-
             start_date: datetime = datetime.now()
             end_date = start_date + timedelta(days=subscribe_timedelta[amount])
 
@@ -188,43 +115,9 @@ async def check_payment(
 
             end_date_str: str = end_date.strftime("%d.%m.%Y")
 
-            image_filename = ""
-            client_id = ""
-            pk = ""
-            async for image in get_next_image_filename():
-                image_filename = image
-                break
-            try:
-                pk = image_filename.split("/")[2].split(".")[0]
-                client_id = "Client_№" + pk
-            except Exception as e:
-                print(e)
-            print(pk)
-            if not os.path.exists(image_filename):
-                await call.message.answer(
-                    text=LEXICON_RU["empty_qr"],
-                    reply_markup=support_keyboard,
-                )
-
-            image_from_pc = FSInputFile(image_filename)
-
-            result = await call.message.answer_photo(
-                photo=image_from_pc,
-                caption=f"✅  Оплата прошла успешно!!! \n\n\n"
-                f"Ваш QR - код для подключения ⤴️ \n\n"
-                f"<b>Срок действия:</b> до {end_date_str}\n\n"
-                f"Перейдите в меню настроек для подключения",
-                reply_markup=settings_keyboard,
+            await process_successful_re_subscription_payment(
+                call, end_date_str, support_keyboard, settings_keyboard
             )
-
-            await files.insert_one(
-                {"user_id": user_id, "photo_id": result.photo[-1].file_id, "pk": pk}
-            )
-            await subs.update_one(
-                filter={"user_id": user_id, "end_date": {"$gt": date}},
-                update={"$set": {"client_id": client_id}},
-            )
-            os.remove(image_filename)
 
         await state.clear()
 
