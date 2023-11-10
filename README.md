@@ -46,7 +46,7 @@ The ".conf" file is also written to the database (file_id) in the "files" table,
   <img src="https://media.giphy.com/media/3b6rWgdpjf0jrvvvZ6/giphy.gif" width="100"/>
 </div>
 
-Questions and suggestions: https://t.me/GcontentPavel
+Questions and suggestions: https://t.me/PavelShau
 
 ## Start
 
