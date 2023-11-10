@@ -38,7 +38,7 @@ There are four folders in total (two folders with photo QR codes (trial and paym
 
 3. The configuration .conf file is identified by and corresponds to the sequence number of the QR code photo shipped. That is - if the file "34.png" for example was sent to a user, then the file "34.conf" will be assigned to this user accordingly.
 The ".conf" file is also written to the database (file_id) in the "files" table, then deleted from the folder.
-4. 
+
 ![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/static_file_template.png)
 
 
