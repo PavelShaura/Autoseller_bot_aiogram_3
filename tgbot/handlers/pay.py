@@ -11,12 +11,11 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from tgbot.config import config
 from tgbot.db.db_api import payments, subs, trial
 from tgbot.services.successful_payment_logic import (
-    process_successful_re_subscription_payment,
+    process_successful_re_subscription_payment, process_successful_first_subscription_payment,
 )
 from tgbot.external_services.yoomoney_api import PaymentYooMoney, NoPaymentFound
 from tgbot.keyboards.inline import settings_keyboard, support_keyboard
 from tgbot.services.apsched import send_message_pay
-
 
 pay_router = Router()
 
@@ -27,10 +26,10 @@ pay_router = Router()
     flags={"throttling_key": "callback"},
 )
 async def check_payment(
-    call: CallbackQuery,
-    bot: Bot,
-    state: FSMContext,
-    apscheduler: AsyncIOScheduler(timezone="Europe/Moscow"),
+        call: CallbackQuery,
+        bot: Bot,
+        state: FSMContext,
+        apscheduler: AsyncIOScheduler(timezone="Europe/Moscow"),
 ):
     user = call.from_user.full_name
     username = call.from_user.username
@@ -115,7 +114,7 @@ async def check_payment(
 
             end_date_str: str = end_date.strftime("%d.%m.%Y")
 
-            await process_successful_re_subscription_payment(
+            await process_successful_first_subscription_payment(
                 call, end_date_str, support_keyboard, settings_keyboard
             )
 
