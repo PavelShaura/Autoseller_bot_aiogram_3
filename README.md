@@ -29,7 +29,7 @@ https://t.me/instaViPN_bot
 3. Follow all steps from the program.
 4. Paste your token in YOOMONEY_TOKEN
 
-## Storing and shipping photos with QR codes and .conf 
+## Structure and storage logic of digital goods sold
 
 1. QR code files and configuration files must be located in the static_files folder, pre-numbered starting from one. 
 There are four folders in total (two folders with photo QR codes (trial and payment), and two folders with .conf configuration files (trial and payment).
