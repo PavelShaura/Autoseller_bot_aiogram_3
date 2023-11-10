@@ -31,10 +31,14 @@ https://t.me/instaViPN_bot
 
 ## Storing and shipping photos with QR codes and .conf 
 
-QR code files and configuration files must be located in the static_files folder, pre-numbered starting from one. There are four folders in total (two folders with photo QR codes (trial and payment), and two folders with .conf configuration files (trial and payment).
-In case of successful payment (or trial subscription) the file is sent to the user, then it is recorded in the database (photo_id) of this file in the table "files" for the possibility of repeated sending to the user, and then deleted from the folder.
-The configuration .conf file is identified by and corresponds to the sequence number of the QR code photo shipped. That is - if the file "34.png" for example was sent to a user, then the file "34.conf" will be assigned to this user accordingly.
+1. QR code files and configuration files must be located in the static_files folder, pre-numbered starting from one. 
+There are four folders in total (two folders with photo QR codes (trial and payment), and two folders with .conf configuration files (trial and payment).
+
+2. In case of successful payment (or trial subscription) the file is sent to the user, then it is recorded in the database (photo_id) of this file in the table "files" for the possibility of repeated sending to the user, and then deleted from the folder.
+
+3. The configuration .conf file is identified by and corresponds to the sequence number of the QR code photo shipped. That is - if the file "34.png" for example was sent to a user, then the file "34.conf" will be assigned to this user accordingly.
 The ".conf" file is also written to the database (file_id) in the "files" table, then deleted from the folder.
+4. 
 ![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/static_file_template.png)
 
 
