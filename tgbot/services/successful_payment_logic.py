@@ -20,7 +20,6 @@ async def process_successful_re_subscription_payment(
     ).get("client_id", "")
 
     if len(sub_flag) > 10:
-
         image_filename = ""
         client_id = ""
         pk = ""

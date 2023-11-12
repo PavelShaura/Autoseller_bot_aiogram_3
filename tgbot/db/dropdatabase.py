@@ -12,20 +12,11 @@ async def drop_collection_data():
     files = db["files"]
     trial = db["trial"]
 
-    # Удалить все данные из коллекции "users"
     await users.delete_many({})
-
-    # Удалить все данные из коллекции "payments"
     await payments.delete_many({})
-
-    # Удалить все данные из коллекции "subs"
     await subs.delete_many({})
-
-    # Удалить все данные из коллекции "files"
     await files.delete_many({})
-
-    # Удалить все данные из коллекции "trial"
-    await trial.delete_many({})  # Пустой фильтр {}
+    await trial.delete_many({})
 
 
 if __name__ == "__main__":

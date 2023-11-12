@@ -69,11 +69,7 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
 
     sub_price = query.text.split()
     current_price = query.text.split()[4]
-    price_mapping = {
-        "600": 600,
-        "900": 900,
-        "1350": 1350
-    }
+    price_mapping = {"600": 600, "900": 900, "1350": 1350}
 
     if current_price in price_mapping:
         amount = price_mapping[current_price]
@@ -147,18 +143,15 @@ async def process_profile(message: Message):
 
     if sub:
         end_date: str = sub["end_date"].strftime("%d.%m.%Y")
-        sub_text: str = (
-            f"Статус подписки: ✅ активирована \nСрок действия: до {end_date}"
-        )
+        sub_text: str = f"Статус подписки: ✅ активирована\nСрок действия: до {end_date}"
+        reply_markup = show_qr_keyboard
     else:
-        sub_text = "Статус подписки: ❌ не активирована "
+        sub_text = "Статус подписки: ❌ не активирована"
+        reply_markup = choose_plan_keyboard
 
-    if sub_text == "Статус подписки: ❌ не активирована ":
-        text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
-        await message.answer(text=text, reply_markup=choose_plan_keyboard)
-    else:
-        text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
-        await message.answer(text=text, reply_markup=show_qr_keyboard)
+    text = f"Профиль\n\nВаш ID: {user_id}\nИмя: {name}\n{username}\n\n{sub_text}\n"
+
+    await message.answer(text=text, reply_markup=reply_markup)
 
 
 @user_router.message(F.text == "Поддержка")
