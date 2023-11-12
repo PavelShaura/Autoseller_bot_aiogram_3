@@ -67,16 +67,16 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
     if sub:
         sub_text = "\n\n<i> ✅ У вас уже активирована подписка. При оплате подписка будет продлена. </i> \n\n"
 
-    sub_price = query.text.split()
+    sub_name = query.text.split()
 
-    current_price = sub_price[4]
+    current_price = sub_name[4]
     price_list = ["600", "900", "1350"]
 
     if current_price in price_list:
         amount = int(current_price)
         text = (
             f"Оплата\n\n\n"
-            f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
+            f"Цена за {sub_name[1]} {sub_name[2]}: {amount} руб. {sub_text}\n"
             f"Оплата банковской картой через платежную систему ЮМани.\n"
             f"Это надёжно и удобно."
         )
