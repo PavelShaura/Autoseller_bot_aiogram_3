@@ -104,6 +104,10 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
 
         await state.set_state("check_payment")
         await state.update_data(payment_id=payment.id, amount=payment.amount)
+    else:
+        await query.message.answer(
+            text="Извините, данный тариф недействителен. Выберите другой тариф  ⤵️",
+            reply_markup=choose_plan_keyboard)
 
 
 @user_router.callback_query(F.data == "settings")
