@@ -66,55 +66,47 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
     sub_text = ""
     if sub:
         sub_text = "\n\n<i> ✅ У вас уже активирована подписка. При оплате подписка будет продлена. </i> \n\n"
-    text = ""
-    amount = 0
+
     sub_price = query.text.split()
-    current_price = sub_price[4]
-    if current_price == "600":
-        amount = 600
+    current_price = query.text.split()[4]
+    price_mapping = {
+        "600": 600,
+        "900": 900,
+        "1350": 1350
+    }
+
+    if current_price in price_mapping:
+        amount = price_mapping[current_price]
         text = (
             f"Оплата\n\n\n"
             f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
             f"Оплата банковской картой через платежную систему ЮМани.\n"
             f"Это надёжно и удобно."
         )
-    elif current_price == "900":
-        amount = 900
-        text = (
-            f"Оплата\n\n\n"
-            f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
-            f"Оплата банковской картой через платежную систему ЮМани.\n"
-            f"Это надёжно и удобно."
-        )
-    elif current_price == "1350":
-        amount = 1350
-        text = (
-            f"Оплата\n\n\n"
-            f"Цена за {sub_price[1]} {sub_price[2]}: {amount} руб. {sub_text}\n"
-            f"Оплата банковской картой через платежную систему ЮМани.\n"
-            f"Это надёжно и удобно."
-        )
-    payment = PaymentYooMoney(amount=amount)
-    payment.create()
-    try:
-        if isinstance(query, Message):
-            await query.answer(
-                text=text,
-                reply_markup=payment_keyboard(
-                    payment_id=payment.id, invoice=payment.invoice
-                ),
-            )
-        else:
-            await query.message.edit_text(
-                text=text,
-                reply_markup=payment_keyboard(
-                    payment_id=payment.id, invoice=payment.invoice
-                ),
-            )
-    except TelegramBadRequest:
-        pass
-    await state.set_state("check_payment")
-    await state.update_data(payment_id=payment.id, amount=payment.amount)
+
+        payment = PaymentYooMoney(amount=amount)
+        payment.create()
+
+        try:
+            if isinstance(query, Message):
+                await query.answer(
+                    text=text,
+                    reply_markup=payment_keyboard(
+                        payment_id=payment.id, invoice=payment.invoice
+                    ),
+                )
+            else:
+                await query.message.edit_text(
+                    text=text,
+                    reply_markup=payment_keyboard(
+                        payment_id=payment.id, invoice=payment.invoice
+                    ),
+                )
+        except TelegramBadRequest:
+            pass
+
+        await state.set_state("check_payment")
+        await state.update_data(payment_id=payment.id, amount=payment.amount)
 
 
 @user_router.callback_query(F.data == "settings")
