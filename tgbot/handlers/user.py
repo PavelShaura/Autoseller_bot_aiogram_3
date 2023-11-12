@@ -69,7 +69,7 @@ async def process_pay(query: Union[Message, CallbackQuery], state: FSMContext):
 
     sub_price = query.text.split()
 
-    current_price = query.text.split()[4]
+    current_price = sub_price[4]
     price_list = ["600", "900", "1350"]
 
     if current_price in price_list:
