@@ -20,6 +20,8 @@ from tgbot.services.apsched import send_message_pay
 
 pay_router = Router()
 
+SUBSCRIBE_TIMELINE = {600: 90, 900: 180, 1350: 365}
+
 
 @pay_router.callback_query(
     F.data.contains("check_payment"),
@@ -41,24 +43,19 @@ async def check_payment(
     state_data: dict[str, Optional[str]] = await state.get_data()
     state_payment_id: Optional[str] = state_data.get("payment_id")
     amount: Optional[int] = state_data.get("amount")
-    print(amount)
+
+    date: datetime = datetime.now()
+
     if payment_id != state_payment_id:
         await call.answer("Вы начинали новую оплату ниже.")
         return
 
     payment = PaymentYooMoney(id=payment_id, amount=amount)
     try:
-        # Заглушка для теста(admin)
-        if user_id in config.tg_bot.admin_ids:
-            amount = payment.__dict__["amount"]
-        else:
-            amount = payment.check_payment()  # Проверка оплаты
+        amount = payment.check_payment()
     except NoPaymentFound:
         await call.answer("Оплата не найдена, сначала выполните оплату.")
-
     else:
-        date: datetime = datetime.now()
-
         trials: dict = await trial.find_one(filter={"user_id": user_id})
 
         try:
@@ -83,11 +80,9 @@ async def check_payment(
         sub: dict = await subs.find_one(
             filter={"user_id": user_id, "end_date": {"$gt": date}}
         )
-        subscribe_timedelta: dict = {600: 90, 900: 180, 1350: 365}
-
         if sub:
             end_date: datetime = sub["end_date"]
-            end_date += timedelta(days=subscribe_timedelta[amount])
+            end_date += timedelta(days=SUBSCRIBE_TIMELINE[amount])
 
             sub = await subs.find_one_and_update(
                 filter={"user_id": user_id, "end_date": {"$gt": date}},
@@ -102,8 +97,8 @@ async def check_payment(
             )
         else:
             await subs.delete_many(filter={"user_id": user_id})
-            start_date: datetime = datetime.now()
-            end_date = start_date + timedelta(days=subscribe_timedelta[amount])
+            start_date: datetime = date
+            end_date = start_date + timedelta(days=SUBSCRIBE_TIMELINE[amount])
 
             await subs.insert_one(
                 document={
