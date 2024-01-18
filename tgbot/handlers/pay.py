@@ -20,7 +20,7 @@ from tgbot.services.apsched import send_message_pay
 
 pay_router = Router()
 
-SUBSCRIBE_TIMELINE = {600: 90, 900: 180, 1350: 365}
+SUBSCRIBE_TIMELINE = {582: 90, 873: 180, 1309.5: 365}
 
 
 @pay_router.callback_query(
@@ -37,6 +37,7 @@ async def check_payment(
     user = call.from_user.full_name
     username = call.from_user.username
     user_id: int = call.from_user.id
+
     data: list[str] = call.data.split(":")
     payment_id: str = data[1]
 
