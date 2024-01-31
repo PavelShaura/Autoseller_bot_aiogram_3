@@ -20,7 +20,7 @@ from tgbot.services.apsched import send_message_pay
 
 pay_router = Router()
 
-SUBSCRIBE_TIMELINE = {582: 90, 873: 180, 1309.5: 365}
+SUBSCRIBE_TIMELINE = {582.0: 90, 873.0: 180, 1309.5: 365}
 
 
 @pay_router.callback_query(
