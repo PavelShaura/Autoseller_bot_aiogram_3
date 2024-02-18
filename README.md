@@ -29,6 +29,9 @@ https://t.me/instaViPN_bot
 3. Follow all steps from the program.
 4. Paste your token in YOOMONEY_TOKEN
 
+Here's what the alerts to the admin group look like:
+![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/group_sample.png)
+
 ## Structure and storage logic of digital goods sold
 
 1. QR code files and configuration files must be located in the static_files folder, pre-numbered starting from one. 
