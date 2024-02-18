@@ -120,7 +120,8 @@ async def check_payment(
         apscheduler.add_job(
             send_message_pay,
             trigger="date",
-            run_date=datetime.now() + timedelta(seconds=10810),
+            # run_date=datetime.now() + timedelta(seconds=10810), # Минус 3 часа по Москве
+            run_date=datetime.now() + timedelta(seconds=3),
             kwargs={
                 "bot": bot,
                 "chat_id": config.tg_bot.channel_id,

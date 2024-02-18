@@ -6,28 +6,11 @@ from tgbot.db.db_api import subs
 from tgbot.config import config
 
 
-# Возвращает список пользователей с подпиской
-async def get_users_in_subs():
-    # Получаем коллекцию с информацией о пользователях и подписках
-    users_collection = subs
-
-    # Запрос к базе данных, чтобы выбрать пользователей с информацией о подписках
-    # и датой окончания подписки:
-    cursor = users_collection.find({"end_date": {"$exists": True}})
-
-    # Преобразуйте результат запроса в список пользователей
-    users = await cursor.to_list(length=None)
-    return users
-
-
-async def get_clients_in_subs():
-    clients_collection = subs
-
-    cursor = clients_collection.find({"client_id": {"$exists": True}})
-
-    client = await cursor.to_list(length=None)
-
-    return client
+async def get_data_in_subs(filter_criteria):
+    collection = subs
+    cursor = collection.find(filter_criteria)
+    data = await cursor.to_list(length=None)
+    return data
 
 
 # Отправляет оповещение пользователям об окончании подписки
@@ -36,7 +19,7 @@ async def send_message_interval(bot: Bot):
     reminder_days = 2  # За сколько дней оповестить об окончании подписки
 
     # Получаем список пользователей из базы данных с информацией о подписках и окончании подписки
-    users = await get_users_in_subs()
+    users = await get_data_in_subs({"end_date": {"$exists": True}})
 
     for user in users:
         user_id = user["user_id"]
@@ -55,7 +38,7 @@ async def send_admin_end_date(bot: Bot):
     today = datetime.now()
     reminder_days = 1  # За сколько дней оповестить об окончании подписки
 
-    clients = await get_clients_in_subs()
+    clients = await get_data_in_subs({"client_id": {"$exists": True}})
 
     for client in clients:
         end_date = client["end_date"]
