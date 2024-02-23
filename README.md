@@ -1,9 +1,11 @@
-# Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoD. 
-# Added possibility to pay with cryptocurrency (bitcoin) powered by the Sellix API
+# Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoD. Added possibility to pay with cryptocurrency (bitcoin) powered by the Sellix API
 
 ![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/insta_vpn_screen.png)
-
+<div id="header">
+  <img src="https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/bot_sample_gif.gif"/>
+</div>
 https://t.me/instaViPN_bot
+
 Added ability to generate cryptocurrency invoices and track their confirmations before order fulfilment/
 (Used SQLite3 to store and manage cryptocurrency payment data)
 ## New features:
