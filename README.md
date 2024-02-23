@@ -38,7 +38,9 @@ Added ability to generate cryptocurrency invoices and track their confirmations 
 2. Run the file yoomoney_auth.py and get your token to access the YOOMONEY API (You'll need YOOMONEY_CLIENT_ID and YOOMONEY_REDIRECT_URL). 
 3. Follow all steps from the program.
 4. Paste your token in YOOMONEY_TOKEN
+
 Before you begin, ensure you have met the access to the Sellix API with your credentials 
+
 Here's what the alerts to the admin group look like:
 ![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/group_sample.png)
 
