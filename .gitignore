@@ -58,8 +58,10 @@ env.bak/
 venv.bak/
 
 # Pyre type checker
+btc_checker_DB.sqlite3
 .pyre/
 .idea
 .env
 cache/
 tgbot/static_files
+logs
