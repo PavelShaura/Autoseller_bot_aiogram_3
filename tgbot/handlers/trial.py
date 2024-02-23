@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Optional
 import os
@@ -6,18 +7,17 @@ from aiogram import Router, F, Bot
 from aiogram.types import Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from tgbot.apsched.send_to_admin_group import notification_trial_taken
 from tgbot.config import config
-from tgbot.db.db_api import subs
-from tgbot.services.apsched import send_message_trial
-from tgbot.services.successful_payment_logic import process_trial_subscription
-
+from tgbot.mongo_db.db_api import subs
+from tgbot.yoomoneylogic.successful_payment_logic import process_trial_subscription
 from tgbot.utils.get_trial_image import get_trial_image_filename
-
+from tgbot.keyboards.reply import choose_plan_keyboard
 from tgbot.keyboards.inline import (
     support_keyboard,
     settings_keyboard,
 )
-from tgbot.keyboards.reply import choose_plan_keyboard
+
 
 trial_router = Router()
 
@@ -70,12 +70,15 @@ async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
             await process_trial_subscription(
                 query, settings_keyboard, client_id, image_filename, pk
             )
+            logging.info(
+                f"{username} ID:{user_id} successfully completed the trial period"
+            )
 
             apscheduler.add_job(
-                send_message_trial,
+                notification_trial_taken,
                 trigger="date",
-                # run_date=datetime.now() + timedelta(seconds=10810), # Минус 3 часа по Москве
-                run_date=datetime.now() + timedelta(seconds=3),
+                # run_date=datetime.now() + timedelta(seconds=10810),
+                run_date=datetime.now() + timedelta(seconds=10),
                 kwargs={
                     "bot": bot,
                     "chat_id": config.tg_bot.channel_id,

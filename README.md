@@ -1,8 +1,16 @@
-# Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoDB
+# Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoD. 
+# Added possibility to pay with cryptocurrency (bitcoin) powered by the Sellix API
 
 ![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/insta_vpn_screen.png)
 
 https://t.me/instaViPN_bot
+Added ability to generate cryptocurrency invoices and track their confirmations before order fulfilment/
+(Used SQLite3 to store and manage cryptocurrency payment data)
+## New features:
+1. Cryptocurrency invoice generation: Generate cryptocurrency invoices via Sellix API directly from the Telegram bot.
+2. Confirmation Tracking: Wait for a predetermined number of confirmations before considering a payment complete.
+3. Data Management: Use SQLite3 to efficiently store and manage transaction and invoice data.
+4. Status and Cancellation: Commands to check the status of an order or cancel it.
 
 ## Installation
 1. Install Python 3.x if it is not installed. [Python.org](https://www.python.org/downloads/)
@@ -28,7 +36,7 @@ https://t.me/instaViPN_bot
 2. Run the file yoomoney_auth.py and get your token to access the YOOMONEY API (You'll need YOOMONEY_CLIENT_ID and YOOMONEY_REDIRECT_URL). 
 3. Follow all steps from the program.
 4. Paste your token in YOOMONEY_TOKEN
-
+Before you begin, ensure you have met the access to the Sellix API with your credentials 
 Here's what the alerts to the admin group look like:
 ![Иллюстрация к проекту](https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/group_sample.png)
 

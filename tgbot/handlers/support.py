@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
@@ -8,12 +9,17 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from tgbot.config import Config
-from tgbot.db.db_api import subs, files, users
 from tgbot.filters.is_admin import AdminFilter
 from tgbot.keyboards.inline import answer_keyboard, cancel_keyboard, support_keyboard
-from tgbot.lexicon.lexicon_ru import LEXICON_RU
+from tgbot.mongo_db.db_api import subs, files, users
+from tgbot.phrasebook.lexicon_ru import LEXICON_RU
 
 support_router = Router()
+
+
+@support_router.message(F.text == "Поддержка")
+async def process_support(message: Message):
+    await message.answer(text=LEXICON_RU["FAQ"], reply_markup=support_keyboard)
 
 
 @support_router.callback_query(F.data == "ask_support")
@@ -84,63 +90,40 @@ async def waiting_question(
 
     for admin in config.tg_bot.admin_ids:
         try:
+            # Определение словаря с методами отправки сообщений по типу контента
+            content_types_methods = {
+                ContentType.TEXT: bot.send_message,
+                ContentType.PHOTO: bot.send_photo,
+                ContentType.VIDEO: bot.send_video,
+                ContentType.DOCUMENT: bot.send_document,
+            }
+
+            # Определение переменных, которые могут использоваться в различных случаях
+            send_args = {
+                "chat_id": admin,
+                "reply_markup": answer_keyboard(user_id=user_id),
+            }
+
+            # Выбор метода отправки сообщения в зависимости от наличия данных о пользователе
+            send_method = content_types_methods.get(
+                message.content_type, bot.send_message
+            )
             if user_data:
                 if message.content_type == ContentType.TEXT:
-                    await bot.send_photo(
-                        chat_id=admin,
-                        photo=photo_id,
-                        caption=text,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
-                elif message.content_type == ContentType.PHOTO:
-                    await bot.send_photo(
-                        chat_id=admin,
-                        caption=text,
-                        photo=message.photo[-1].file_id,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
-                elif message.content_type == ContentType.VIDEO:
-                    await bot.send_video(
-                        chat_id=admin,
-                        caption=text,
-                        video=message.video.file_id,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
-                elif message.content_type == ContentType.DOCUMENT:
-                    await bot.send_document(
-                        chat_id=admin,
-                        caption=text,
-                        document=message.document.file_id,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
+                    send_method = bot.send_photo
+                    send_args["photo"] = photo_id
+                    send_args["caption"] = text
+                else:
+                    send_method = bot.send_photo
+                    send_args["photo"] = message.photo[-1].file_id
+                    send_args["caption"] = text
             else:
-                if message.content_type == ContentType.TEXT:
-                    await bot.send_message(
-                        chat_id=admin,
-                        text=text,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
-                elif message.content_type == ContentType.PHOTO:
-                    await bot.send_photo(
-                        chat_id=admin,
-                        caption=text,
-                        photo=message.photo[-1].file_id,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
-                elif message.content_type == ContentType.VIDEO:
-                    await bot.send_video(
-                        chat_id=admin,
-                        caption=text,
-                        video=message.video.file_id,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
-                elif message.content_type == ContentType.DOCUMENT:
-                    await bot.send_document(
-                        chat_id=admin,
-                        caption=text,
-                        document=message.document.file_id,
-                        reply_markup=answer_keyboard(user_id=user_id),
-                    )
+                send_args["text"] = text
+
+            # Отправка сообщения с выбранным методом
+            await send_method(**send_args)
+            logging.info(f"{name} ID:{user_id} -  sent a support request!")
+
         except Exception as e:
             print(e)
     await message.answer(text=f"<b>✅ Сообщение было отправлено</b>")

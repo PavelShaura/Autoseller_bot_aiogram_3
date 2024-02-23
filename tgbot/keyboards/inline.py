@@ -69,3 +69,23 @@ show_qr_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Показать Ваш QR-код", callback_data="show_qr")]
     ]
 )
+
+choose_payment = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Банковская карта 💳", callback_data="u_money"),
+            InlineKeyboardButton(text="BITCOIN 💸", callback_data="cryptopay"),
+        ]
+    ]
+)
+
+status_or_cancel_payment_bitcoin = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="Проверить статус платежа", callback_data="btc_status"
+            ),
+            InlineKeyboardButton(text="Отменить платеж", callback_data="btc_cancel"),
+        ]
+    ]
+)

@@ -1,6 +1,7 @@
 import asyncio
+import os
 import logging
-
+from logging.handlers import RotatingFileHandler
 
 import betterlogging as bl
 from aiogram import Bot, Dispatcher, F
@@ -8,16 +9,20 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.callback_answer import CallbackAnswerMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from tgbot.handlers.pay import pay_router
+from tgbot.apsched.send_to_admin_group import notification_to_admin_group
+from tgbot.apsched.send_to_user import notification_to_user
+from tgbot.handlers.Invoicingpayment import invoicing_for_payment_router
+from tgbot.handlers.checkpayment import check_payment_router
+from tgbot.handlers.profile import profile_router
 from tgbot.handlers.settings import settings_router
+from tgbot.handlers.start import start_router
 from tgbot.handlers.support import support_router
 from tgbot.handlers.trial import trial_router
-from tgbot.handlers.user import user_router
 from tgbot.middlewares.config import ConfigMiddleware
 from tgbot.middlewares.throttling import ThrottlingMiddleware
 from tgbot.middlewares.schedulermiddleware import SchedulerMiddleware
 from tgbot.services.set_bot_commands import set_default_commands
-from tgbot.services import broadcaster, apsched
+from tgbot.services import broadcaster
 
 logger = logging.getLogger(__name__)
 log_level = logging.INFO
@@ -37,11 +42,33 @@ def register_global_middlewares(dp: Dispatcher, config):
 
 
 def register_logger():
+    log_format = (
+        "%(filename)s [LINE:%(lineno)d] #%(levelname)-6s [%(asctime)s]  %(message)s"
+    )
+    date_format = "%d.%m.%Y %H:%M:%S"
+
     logging.basicConfig(
-        format="%(filename)s [LINE:%(lineno)d] #%(levelname)-6s [%(asctime)s]  %(message)s",
-        datefmt="%d.%m.%Y %H:%M:%S",
+        format=log_format,
+        datefmt=date_format,
         level=log_level,
     )
+
+    logger = logging.getLogger()
+
+    # Установка уровня логирования для корневого логгера
+    logger.setLevel(log_level)
+
+    # Создание обработчика для записи логов в файл
+    log_file_path = os.path.join("logs", "bot.log")  # Путь к файлу логов
+    os.makedirs(
+        os.path.dirname(log_file_path), exist_ok=True
+    )  # Создание директории для файлов логов
+    file_handler = RotatingFileHandler(
+        log_file_path, maxBytes=10 * 1024 * 1024, backupCount=5
+    )  # Максимальный размер файла 10 МБ, хранится 5 файлов
+    file_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=date_format))
+    logger.addHandler(file_handler)
+
     logger.info("Starting bot")
 
 
@@ -56,25 +83,29 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+
     scheduler.add_job(
-        apsched.send_message_interval,
+        notification_to_user,
         trigger="interval",
         days=1,
         kwargs={"bot": bot},
     )
     scheduler.add_job(
-        apsched.send_admin_end_date, trigger="interval", days=1, kwargs={"bot": bot}
+        notification_to_admin_group, trigger="interval", days=1, kwargs={"bot": bot}
     )
+
     scheduler.start()
 
     dp.update.middleware.register(SchedulerMiddleware(scheduler))
 
     for router in [
-        user_router,
+        start_router,
         support_router,
-        pay_router,
+        profile_router,
+        check_payment_router,
         settings_router,
         trial_router,
+        invoicing_for_payment_router,
     ]:
         dp.include_router(router)
     dp.message.filter(F.chat.type == "private")

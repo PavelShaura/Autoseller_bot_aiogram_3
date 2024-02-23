@@ -1,17 +1,41 @@
+import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 import os
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile, Message
 from pymongo.errors import OperationFailure
 
-from tgbot.db.db_api import subs, files, trial
-from tgbot.keyboards.inline import show_qr_keyboard, support_keyboard
+
+from tgbot.keyboards.inline import show_qr_keyboard, support_keyboard, os_keyboard
 from tgbot.keyboards.reply import menu_keyboard
-from tgbot.lexicon.lexicon_ru import LEXICON_RU
+from tgbot.mongo_db.db_api import subs, files, trial
+from tgbot.phrasebook.lexicon_ru import LEXICON_RU
 
 settings_router = Router()
+
+
+@settings_router.callback_query(F.data == "settings")
+@settings_router.message(F.text == "Мои настройки")
+async def process_settings(query: Union[Message, CallbackQuery]):
+    user_id: int = query.from_user.id
+
+    message: Message = query if isinstance(query, Message) else query.message
+
+    sub: Optional[dict] = await subs.find_one(
+        filter={"user_id": user_id, "end_date": {"$gt": datetime.now()}}
+    )
+
+    if not sub:
+        await message.answer(text=LEXICON_RU["no_sub"])
+        return
+
+    await message.answer(
+        text=LEXICON_RU["yes_sub"],
+        disable_web_page_preview=True,
+        reply_markup=os_keyboard,
+    )
 
 
 @settings_router.callback_query(
@@ -124,6 +148,7 @@ async def choose_os(call: CallbackQuery):
 @settings_router.callback_query(F.data.contains("show_qr"))
 async def show_qr(call: CallbackQuery):
     user_id: int = call.from_user.id
+    username = call.from_user.username
     date: datetime = datetime.now()
 
     sub: Optional[dict] = await subs.find_one(
@@ -147,3 +172,4 @@ async def show_qr(call: CallbackQuery):
                 text=LEXICON_RU["empty_qr"],
                 reply_markup=support_keyboard,
             )
+            logging.info(f"For {user_id} {username} QR- code didn't send")

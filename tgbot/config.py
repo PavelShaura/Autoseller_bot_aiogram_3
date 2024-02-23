@@ -15,6 +15,7 @@ class TgBot:
     token: str
     admin_ids: list[int]
     channel_id: int
+    selix_api_key: str
 
 
 @dataclass
@@ -41,6 +42,7 @@ def load_config(path: str = ".env") -> Config:
             token=env.str("BOT_TOKEN"),
             admin_ids=env.list("ADMINS", subcast=int),
             channel_id=env.int("CHANNEL_INFO_ID"),
+            selix_api_key=env.str("SELLIX_API_KEY"),
         ),
         db=DbConfig(
             host=env.str("DB_HOST"), port=env.int("DB_PORT"), name=env.str("DB_NAME")

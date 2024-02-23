@@ -3,9 +3,9 @@ import os
 
 from aiogram.types import FSInputFile
 
-from tgbot.db.db_api import subs, files, trial
+from tgbot.mongo_db.db_api import files, subs, trial
 from tgbot.utils.get_image import get_next_image_filename
-from tgbot.lexicon.lexicon_ru import LEXICON_RU
+from tgbot.phrasebook.lexicon_ru import LEXICON_RU
 
 
 async def process_successful_re_subscription_payment(
