@@ -10,7 +10,7 @@ class ThrottlingMiddleware(BaseMiddleware):
     caches = {
         "default": {
             "cache": TTLCache(maxsize=10_000, ttl=5),
-            "text": "<b>🥵 Не пишите так часто!</b>",
+            "text": "🥵 Не пишите так часто!",
         },
         "callback": {
             "cache": TTLCache(maxsize=10_000, ttl=10),
@@ -18,7 +18,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         },
         "payment": {
             "cache": TTLCache(maxsize=10_000, ttl=15),
-            "text": "<b>🙌 Вы недавно уже запрашивали ссылку на оплату. Подождите немного.</b>",
+            "text": "🙌 Вы недавно уже запрашивали ссылку на оплату. Подождите немного.",
         },
     }
 

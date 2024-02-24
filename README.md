@@ -1,4 +1,4 @@
-# Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoD. Added possibility to pay with cryptocurrency (bitcoin) powered by the Sellix API
+# Bot auto sales of digital goods (subscription to VPN) using API Yoomoney and MongoDB. Added possibility to pay with cryptocurrency (bitcoin) powered by the Sellix API
 
 
 <div id="header">

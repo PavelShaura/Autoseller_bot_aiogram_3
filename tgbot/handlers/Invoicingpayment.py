@@ -28,7 +28,7 @@ invoicing_for_payment_router = Router()
 @invoicing_for_payment_router.callback_query(
     F.data.contains("u_money"),
     StateFilter("check_plan"),
-    # flags={"throttling_key": "payment"}
+    flags={"throttling_key": "payment"}
 )
 async def invoicing_for_payment_umoney(call: CallbackQuery, state: FSMContext):
     user_id: int = call.from_user.id
@@ -77,7 +77,7 @@ async def invoicing_for_payment_umoney(call: CallbackQuery, state: FSMContext):
 @invoicing_for_payment_router.callback_query(
     F.data.contains("cryptopay"),
     StateFilter("check_plan"),
-    # flags={"throttling_key": "payment"}
+    flags={"throttling_key": "payment"}
 )
 async def invoicing_for_payment_bitcoin(
     call: CallbackQuery,
