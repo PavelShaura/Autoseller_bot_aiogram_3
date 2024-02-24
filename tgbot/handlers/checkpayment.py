@@ -6,9 +6,9 @@ from aiogram import Router, F, Bot
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from tgbot.apsched.send_to_admin_group import notification_payment_cleared
+from tgbot.apscheduler.apscheduler import scheduler
+from tgbot.apscheduler.send_to_admin_group import notification_payment_cleared
 from tgbot.config import config
 from tgbot.yoomoneylogic.check_payment_logic import (
     process_check_payment_and_subscription,
@@ -24,12 +24,7 @@ check_payment_router = Router()
     StateFilter("check_payment"),
     flags={"throttling_key": "callback"},
 )
-async def check_payment(
-    call: CallbackQuery,
-    bot: Bot,
-    state: FSMContext,
-    apscheduler: AsyncIOScheduler(timezone="Europe/Moscow"),
-):
+async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext):
     user = call.from_user.full_name
     username = call.from_user.username
     user_id: int = call.from_user.id
@@ -55,7 +50,7 @@ async def check_payment(
 
         logging.info(f"Good news! {user} successfully subscribed! Amount {amount}")
 
-        apscheduler.add_job(
+        scheduler.add_job(
             notification_payment_cleared,
             trigger="date",
             run_date=datetime.now() + timedelta(seconds=10810),

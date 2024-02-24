@@ -48,5 +48,5 @@ async def notification_trial_taken(bot: Bot, chat_id: int, user, username, clien
     )
     await bot.send_message(chat_id, text=text)
     logging.info(
-        f"User: {user}({username})👤 has signed up for a TRIAL(trial period) ID: {client_id}"
+        f"User: {user}({username}) has signed up for a TRIAL(trial period) ID: {client_id}"
     )

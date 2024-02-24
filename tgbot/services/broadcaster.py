@@ -17,7 +17,7 @@ async def send_message(
             f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.retry_after} seconds."
         )
         await asyncio.sleep(e.retry_after)
-        return await send_message(bot, user_id, text)  # Recursive call
+        return await send_message(bot, user_id, text)
     except exceptions.TelegramAPIError:
         logging.exception(f"Target [ID:{user_id}]: failed")
     else:
@@ -27,18 +27,12 @@ async def send_message(
 
 
 async def broadcast(bot, users, text) -> int:
-    """
-    Simple broadcaster
-    :return: Count of messages
-    """
     count = 0
     try:
         for user_id in users:
             if await send_message(bot, user_id, text):
                 count += 1
-            await asyncio.sleep(
-                0.05
-            )  # 20 messages per second (Limit: 30 messages per second)
+            await asyncio.sleep(0.05)
     finally:
         logging.info(f"{count} messages successful sent.")
 

@@ -7,14 +7,14 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.job import Job
 
-from tgbot.apsched.check_bitcoin_payment import start_periodic_check
+from tgbot.apscheduler.apscheduler import scheduler
+from tgbot.apscheduler.check_bitcoin_payment import start_periodic_check
 from tgbot.config import config
 from tgbot.cryptopaylogic.conf_check import CHAT_ID_INDEX, USER_ID_INDEX, STATUS_INDEX
 from tgbot.cryptopaylogic.create_order import create_order
-from tgbot.cryptopaylogic.database import db_manager
+from tgbot.sqlite.database import db_manager
 from tgbot.cryptopaylogic.delete_order import delete_sellix_order
 from tgbot.mongo_db.db_api import subs
 from tgbot.phrasebook.lexicon_ru import TRANSACTIONS
@@ -79,12 +79,7 @@ async def invoicing_for_payment_umoney(call: CallbackQuery, state: FSMContext):
     StateFilter("check_plan"),
     flags={"throttling_key": "payment"},
 )
-async def invoicing_for_payment_bitcoin(
-    call: CallbackQuery,
-    state: FSMContext,
-    bot: Bot,
-    apscheduler: AsyncIOScheduler(timezone="Europe/Moscow"),
-):
+async def invoicing_for_payment_bitcoin(call: CallbackQuery, state: FSMContext):
     user_id: int = call.from_user.id
     username = call.from_user.username
     message = call.message
@@ -110,8 +105,8 @@ async def invoicing_for_payment_bitcoin(
     )
 
     await call.message.edit_text(
-        text=f"Оплата <b>{gateway}</b>  🪙\n\n"
-        f"Пополните <code>{amount}</code> <b>BTC</b>\n{sub_text}\n"
+        text=f"Оплата <b>{gateway}</b>  🪙\n\n{sub_text}"
+        f"Пополните <code>{amount}</code> <b>BTC</b>\n"
         f"<b>На кошелек:</b> \n<code>{address}</code>\n\n"
         f"<b>Ваш идентификатор заказа:</b> <code>{uniqid}</code>\n\n"
         f"<b>Бот автоматически проверяет статус платежа.</b>\n\n"
@@ -120,18 +115,17 @@ async def invoicing_for_payment_bitcoin(
         parse_mode="HTML",
         reply_markup=status_or_cancel_payment_bitcoin,
     )
-    job: Job = apscheduler.add_job(
+    job: Job = scheduler.add_job(
         start_periodic_check,
         trigger="interval",
         seconds=15,
         kwargs={
-            "bot": bot,
+            "bot": Bot,
             "chat_id": chat_id,
             "uniqid": uniqid,
             "user_id": user_id,
             "amount": value,
             "call": call,
-            "apscheduler": apscheduler,
         },
     )
     job_id = job.id

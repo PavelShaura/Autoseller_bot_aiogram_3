@@ -29,7 +29,6 @@ async def process_settings(query: Union[Message, CallbackQuery]):
 
     if not sub:
         await message.answer(text=LEXICON_RU["no_sub"])
-        return
 
     await message.answer(
         text=LEXICON_RU["yes_sub"],
@@ -51,7 +50,6 @@ async def choose_os(call: CallbackQuery):
 
     if not sub:
         await call.answer(text=LEXICON_RU["not_sub"], show_alert=True)
-        return
 
     data: list[str] = call.data.split(":")
     _os: str = data[1]
@@ -87,7 +85,6 @@ async def choose_os(call: CallbackQuery):
         else:
             pk: str = user_data.get("pk")
             file_path = f"tgbot/static_files/client_conf_files/{pk}.conf"
-        print(file_path)
         if not os.path.exists(file_path):
             try:
                 file_id = user_data.get("file_id")

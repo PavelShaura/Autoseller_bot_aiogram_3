@@ -5,9 +5,9 @@ import os
 
 from aiogram import Router, F, Bot
 from aiogram.types import Message
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from tgbot.apsched.send_to_admin_group import notification_trial_taken
+from tgbot.apscheduler.apscheduler import scheduler
+from tgbot.apscheduler.send_to_admin_group import notification_trial_taken
 from tgbot.config import config
 from tgbot.mongo_db.db_api import subs
 from tgbot.yoomoneylogic.successful_payment_logic import process_trial_subscription
@@ -23,7 +23,7 @@ trial_router = Router()
 
 
 @trial_router.message(F.text.in_({"🔥 АКЦИЯ!!! 🔥 ⏱ Пробный период на 3 дня"}))
-async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
+async def process_pay(query: Message, bot: Bot):
     user_id: int = query.from_user.id
     user = query.from_user.full_name
     username = query.from_user.username
@@ -74,7 +74,7 @@ async def process_pay(query: Message, bot: Bot, apscheduler: AsyncIOScheduler):
                 f"{username} ID:{user_id} successfully completed the trial period"
             )
 
-            apscheduler.add_job(
+            scheduler.add_job(
                 notification_trial_taken,
                 trigger="date",
                 # run_date=datetime.now() + timedelta(seconds=10810),

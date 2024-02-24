@@ -2,27 +2,17 @@ import asyncio
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-
 import betterlogging as bl
+
 from aiogram import Bot, Dispatcher, F
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.callback_answer import CallbackAnswerMiddleware
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from tgbot.apsched.send_to_admin_group import notification_to_admin_group
-from tgbot.apsched.send_to_user import notification_to_user
-from tgbot.handlers.Invoicingpayment import invoicing_for_payment_router
-from tgbot.handlers.checkpayment import check_payment_router
-from tgbot.handlers.profile import profile_router
-from tgbot.handlers.settings import settings_router
-from tgbot.handlers.start import start_router
-from tgbot.handlers.support import support_router
-from tgbot.handlers.trial import trial_router
-from tgbot.middlewares.config import ConfigMiddleware
-from tgbot.middlewares.throttling import ThrottlingMiddleware
-from tgbot.middlewares.schedulermiddleware import SchedulerMiddleware
-from tgbot.services.set_bot_commands import set_default_commands
-from tgbot.services import broadcaster
+from tgbot import apscheduler
+from tgbot import handlers
+from tgbot import middlewares
+from tgbot import services
+
 
 logger = logging.getLogger(__name__)
 log_level = logging.INFO
@@ -30,14 +20,16 @@ bl.basic_colorized_config(level=log_level)
 
 
 async def on_startup(bot: Bot, admin_ids: list[int]):
-    await broadcaster.broadcast(bot, admin_ids, "Бот запущен! Вы администратор!")
+    await services.broadcaster.broadcast(
+        bot, admin_ids, "Бот запущен! Вы администратор!"
+    )
 
 
 def register_global_middlewares(dp: Dispatcher, config):
-    dp.message.outer_middleware(ConfigMiddleware(config))
-    dp.callback_query.outer_middleware(ConfigMiddleware(config))
-    dp.message.middleware(ThrottlingMiddleware())
-    dp.callback_query.middleware(ThrottlingMiddleware())
+    dp.message.outer_middleware(middlewares.ConfigMiddleware(config))
+    dp.callback_query.outer_middleware(middlewares.ConfigMiddleware(config))
+    dp.message.middleware(middlewares.ThrottlingMiddleware())
+    dp.callback_query.middleware(middlewares.ThrottlingMiddleware())
     dp.callback_query.middleware(CallbackAnswerMiddleware())
 
 
@@ -82,30 +74,33 @@ async def main():
     bot = Bot(token=config.tg_bot.token, parse_mode="HTML")
     dp = Dispatcher(storage=storage)
 
-    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-
-    scheduler.add_job(
-        notification_to_user,
+    apscheduler.scheduler.add_job(
+        apscheduler.notification_to_user,
         trigger="interval",
         days=1,
         kwargs={"bot": bot},
     )
-    scheduler.add_job(
-        notification_to_admin_group, trigger="interval", days=1, kwargs={"bot": bot}
+    apscheduler.scheduler.add_job(
+        apscheduler.notification_to_admin_group,
+        trigger="interval",
+        days=1,
+        kwargs={"bot": bot},
     )
 
-    scheduler.start()
+    apscheduler.scheduler.start()
 
-    dp.update.middleware.register(SchedulerMiddleware(scheduler))
+    dp.update.middleware.register(
+        middlewares.SchedulerMiddleware(apscheduler.scheduler)
+    )
 
     for router in [
-        start_router,
-        support_router,
-        profile_router,
-        check_payment_router,
-        settings_router,
-        trial_router,
-        invoicing_for_payment_router,
+        handlers.start_router,
+        handlers.support_router,
+        handlers.profile_router,
+        handlers.check_payment_router,
+        handlers.settings_router,
+        handlers.trial_router,
+        handlers.invoicing_for_payment_router,
     ]:
         dp.include_router(router)
     dp.message.filter(F.chat.type == "private")
@@ -113,7 +108,7 @@ async def main():
 
     register_global_middlewares(dp, config)
 
-    await set_default_commands(bot)
+    await services.set_default_commands(bot)
 
     await on_startup(bot, config.tg_bot.admin_ids)
     await dp.start_polling(bot)
