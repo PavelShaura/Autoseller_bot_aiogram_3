@@ -41,9 +41,9 @@ def start_periodic_check(bot: Bot, call, chat_id, uniqid, user_id, amount):
 
         if (last_status, current_status) in valid_transitions:
             message = (
-                f"Order <code>{uniqid}</code> "
-                f"status changed from <code>{last_status}</code> "
-                f"to <code>{current_status}</code>"
+                f"Для идентификатора <code>{uniqid}</code> \n"
+                f"статус изменен с <code>{last_status}</code> \n"
+                f"на <code>{current_status}</code>"
             )
             bot.send_message(chat_id=chat_id, text=message, parse_mode="HTML")
             logging.info(
@@ -60,7 +60,7 @@ def start_periodic_check(bot: Bot, call, chat_id, uniqid, user_id, amount):
                 db_manager.update_order_hash(uniqid, crypto_hash)
                 bot.send_message(
                     chat_id=chat_id,
-                    text=f"Transaction hash: <code>{crypto_hash}</code>",
+                    text=f"Hash транзакции: <code>{crypto_hash}</code>",
                     parse_mode="HTML",
                 )
 
@@ -69,7 +69,7 @@ def start_periodic_check(bot: Bot, call, chat_id, uniqid, user_id, amount):
             if success:
                 bot.send_message(
                     chat_id=chat_id,
-                    text=f"Order <code>{uniqid}</code> has been automatically cancelled due to timeout.",
+                    text=f"Заказ <code>{uniqid}</code> был автоматически отменен из-за таймаута.",
                     parse_mode="HTML",
                 )
                 db_manager.update_order_status(uniqid, "CANCELLED")
