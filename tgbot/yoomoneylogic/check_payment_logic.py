@@ -1,7 +1,4 @@
-import logging
-
 from pymongo import ReturnDocument
-
 
 from datetime import datetime, timedelta
 
