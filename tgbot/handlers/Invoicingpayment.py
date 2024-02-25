@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
@@ -120,7 +120,6 @@ async def invoicing_for_payment_bitcoin(call: CallbackQuery, state: FSMContext):
         trigger="interval",
         seconds=15,
         kwargs={
-            "bot": Bot,
             "chat_id": chat_id,
             "uniqid": uniqid,
             "user_id": user_id,
@@ -141,6 +140,7 @@ async def invoicing_for_payment_bitcoin(call: CallbackQuery, state: FSMContext):
         job_id,
     )
     logging.info(f"{username} added to btc_checker_DB ID {user_id}")
+    db_manager.update_job_context(job_id, date)
     await state.set_state("waiting_bitcoin")
     await state.update_data(uniqid=uniqid)
 

@@ -99,5 +99,5 @@ TRANSACTIONS = {
     "PENDING": " ОЖИДАНИЕ ПОСТУПЛЕНИЯ",
     "WAITING_FOR_CONFIRMATIONS": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЙ",
     "COMPLETED": "ЗАВЕРШЕНО",
-    "Cancelled": "ОТМЕНЕН",
+    "Cancelled": "ОТМЕНЕН"
 }

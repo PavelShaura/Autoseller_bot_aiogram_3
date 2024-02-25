@@ -23,7 +23,8 @@ class SQLiteDBManager:
                 crypto TEXT,
                 amount INTEGER,
                 hash TEXT,
-                job_id TEXT
+                job_id TEXT,
+                last_check_time TEXT
             )
         """
         )
@@ -111,6 +112,26 @@ class SQLiteDBManager:
         job_id = cursor.fetchone()
         conn.close()
         return job_id[0] if job_id else None
+
+    def update_job_context(self, job_id, last_check_time):
+        conn = self._connect()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE orders SET last_check_time = ? WHERE job_id = ?
+            """,
+            (last_check_time, job_id),
+        )
+        conn.commit()
+        conn.close()
+
+    def get_job_context(self, job_id):
+        conn = self._connect()
+        cursor = conn.cursor()
+        cursor.execute("SELECT last_check_time FROM orders WHERE job_id = ?", (job_id,))
+        last_check_time = cursor.fetchone()
+        conn.close()
+        return last_check_time[0] if last_check_time else None
 
 
 db_manager = SQLiteDBManager("btc_checker_DB.sqlite3")
