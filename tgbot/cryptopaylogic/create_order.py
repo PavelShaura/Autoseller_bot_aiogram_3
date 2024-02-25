@@ -18,41 +18,32 @@ async def create_order(api_key, gateway, value):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(endpoint, json=payload, headers=headers) as response:
-            if response.status == 200:
-                data = await response.json()
-
-                # Проверяем, все ли ожидаемые ключи присутствуют в ответе
-                if (
-                    data
-                    and isinstance(data.get("data"), dict)
-                    and isinstance(data["data"].get("invoice"), dict)
-                ):
-                    invoice = data["data"]["invoice"]
-                    crypto_uri = invoice.get("crypto_uri")
-                    uniqid = invoice.get("uniqid")
-
-                    if crypto_uri and uniqid:
-                        try:
-                            address, amount_param = crypto_uri.split("?")
-                            # Вставляем пробел после двоеточия в адресе
-                            if ":" in address:
-                                protocol, addr = address.split(":", 1)
-                                address = addr
-                            amount = amount_param.split("=")[1]
-                            return address, amount, uniqid, protocol, value
-                        except Exception as e:
-                            logging.info(f"Error splitting crypto_uri: {crypto_uri}")
-                            raise Exception(f"Error processing crypto_uri: {e}")
-                    else:
-                        logging.info(f"crypto_uri or uniqid is missing: {invoice}")
-                        raise Exception("Missing crypto_uri or uniqid in the response.")
-                else:
-                    logging.info(f"Unexpected response structure: {data}")
-                    raise Exception("Unexpected data structure in response.")
-            else:
+            if response.status != 200:
                 logging.info(
                     f"Failed to create payment. Status Code: {response.status}, Response: {await response.text()}"
                 )
                 raise Exception(
                     f"Failed to create payment. Status Code: {response.status}, Response: {await response.text()}"
                 )
+
+            data = await response.json()
+            invoice = data.get("data", {}).get("invoice", {})
+            if not (invoice and isinstance(invoice, dict)):
+                logging.info(f"Unexpected response structure: {data}")
+                raise Exception("Unexpected data structure in response.")
+
+            crypto_uri = invoice.get("crypto_uri")
+            uniqid = invoice.get("uniqid")
+            if not (crypto_uri and uniqid):
+                logging.info(f"crypto_uri or uniqid is missing: {invoice}")
+                raise Exception("Missing crypto_uri or uniqid in the response.")
+
+            try:
+                address, amount_param = crypto_uri.split("?")
+                if ":" in address:
+                    protocol, address = address.split(":", 1)
+                amount = amount_param.split("=")[1]
+                return address, amount, uniqid, protocol, value
+            except Exception as e:
+                logging.info(f"Error splitting crypto_uri: {crypto_uri}")
+                raise Exception(f"Error processing crypto_uri: {e}")
