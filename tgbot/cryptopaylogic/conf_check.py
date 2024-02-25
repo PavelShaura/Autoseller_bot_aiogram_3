@@ -1,4 +1,4 @@
-import requests
+import aiohttp
 
 
 UNIQID_INDEX = 0
@@ -17,32 +17,22 @@ async def check_order_status(api_key, uniqid):
     headers = {"Authorization": f"Bearer {api_key}"}
     status, crypto_hash = None, None
 
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            print(f"Non-successful response code: {response.status_code}")
-            return status, crypto_hash
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as response:
+                if response.status != 200:
+                    print(f"Non-successful response code: {response.status}")
+                    return status, crypto_hash
 
-        # Проверяем что ответ содержит корректный JSON
-        response_json = response.json()
-        if not isinstance(response_json, dict):
-            print(f"Invalid JSON response: {response_json}")
-            return status, crypto_hash
+                response_json = await response.json()
+                order_details = response_json.get("data", {}).get("order", {})
+                status = order_details.get("status")
 
-        # Извлечение деталей заказа
-        order_details = response_json.get("data", {}).get("order", {})
-        if not isinstance(order_details, dict):
-            print(f"Invalid order details format: {order_details}")
-            return status, crypto_hash
-
-        # Извлечение status и crypto_hash
-        status = order_details.get("status")
-        if status in ["WAITING_FOR_CONFIRMATIONS", "COMPLETED"]:
-            transactions = order_details.get("crypto_transactions", [])
-            if transactions and isinstance(transactions, list):
-                crypto_hash = transactions[0].get("hash")
-
-    except requests.RequestException as e:
-        print(f"Failed to get order status: {e}")
+                if status in ["WAITING_FOR_CONFIRMATIONS", "COMPLETED"]:
+                    transactions = order_details.get("crypto_transactions", [])
+                    if transactions and isinstance(transactions, list):
+                        crypto_hash = transactions[0].get("hash")
+        except aiohttp.ClientError as e:
+            print(f"Failed to get order status: {e}")
 
     return status, crypto_hash
