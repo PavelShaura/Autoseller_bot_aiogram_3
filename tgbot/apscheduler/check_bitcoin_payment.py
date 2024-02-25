@@ -12,10 +12,9 @@ from tgbot.yoomoneylogic.check_payment_logic import (
 
 
 async def start_periodic_check(call, chat_id, uniqid, user_id, amount):
-
     job_id = db_manager.get_job_id(uniqid)
     job_context = db_manager.get_job_context(job_id)
-    first_check_time = datetime.strptime(job_context, '%Y-%m-%d %H:%M:%S.%f')
+    first_check_time = datetime.strptime(job_context, "%Y-%m-%d %H:%M:%S.%f")
 
     if not chat_id or not uniqid:
         logging.error("The chat ID or Uniqid is not present in the context of the job.")
@@ -64,7 +63,9 @@ async def start_periodic_check(call, chat_id, uniqid, user_id, amount):
                 )
 
         if last_status == "PENDING" and time_diff > delete_after:
-            success, message = await delete_sellix_order(config.tg_bot.selix_api_key, uniqid)
+            success, message = await delete_sellix_order(
+                config.tg_bot.selix_api_key, uniqid
+            )
             if success:
                 await call.message.answer(
                     text=f"Заказ <code>{uniqid}</code> был автоматически отменен из-за таймаута.",
