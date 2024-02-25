@@ -2,6 +2,10 @@ import sqlite3
 
 
 class SQLiteDBManager:
+    """
+    Manager class for interacting with a SQLite database.
+    """
+
     def __init__(self, db_path):
         self.db_path = db_path
         self._create_table()
@@ -10,6 +14,12 @@ class SQLiteDBManager:
         return sqlite3.connect(self.db_path)
 
     def _create_table(self):
+        """
+        Initialize the SQLiteDBManager instance.
+
+        Args:
+        db_path (str): The path to the SQLite database file.
+        """
         conn = self._connect()
         cursor = conn.cursor()
         cursor.execute(
@@ -134,4 +144,5 @@ class SQLiteDBManager:
         return last_check_time[0] if last_check_time else None
 
 
-db_manager = SQLiteDBManager("btc_checker_DB.sqlite3")
+# Creating an instance of SQLiteDBManager
+db_manager = SQLiteDBManager("db_btc_checker.sqlite3")

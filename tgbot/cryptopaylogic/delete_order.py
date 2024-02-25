@@ -1,10 +1,23 @@
 import logging
 import aiohttp
+from typing import Tuple
 
 
-async def delete_sellix_order(api_key, uniqid):
-    url = f"https://dev.sellix.io/v1/payments/{uniqid}"
-    headers = {"Authorization": f"Bearer {api_key}"}
+async def delete_sellix_order(api_key: str, uniqid: str) -> Tuple[bool, str]:
+    """
+    Delete a Sellix order.
+
+    Args:
+        api_key (str): The API key for authentication.
+        uniqid (str): The unique identifier of the order.
+
+    Returns:
+        Tuple[bool, str]: A tuple containing a boolean indicating success and a message.
+
+    This function sends a request to delete a Sellix order using the provided API key and order ID.
+    """
+    url: str = f"https://dev.sellix.io/v1/payments/{uniqid}"
+    headers: dict = {"Authorization": f"Bearer {api_key}"}
 
     async with aiohttp.ClientSession() as session:
         try:

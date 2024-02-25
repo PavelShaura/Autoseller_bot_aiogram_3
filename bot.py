@@ -13,7 +13,6 @@ from tgbot import handlers
 from tgbot import middlewares
 from tgbot import services
 
-
 logger = logging.getLogger(__name__)
 log_level = logging.INFO
 bl.basic_colorized_config(level=log_level)
@@ -44,8 +43,6 @@ def register_logger():
         datefmt=date_format,
         level=log_level,
     )
-
-    logger = logging.getLogger()
 
     # Установка уровня логирования для корневого логгера
     logger.setLevel(log_level)

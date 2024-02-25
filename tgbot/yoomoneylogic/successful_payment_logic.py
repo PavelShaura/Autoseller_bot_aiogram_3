@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import os
+from typing import Union
 
-from aiogram.types import FSInputFile
+from aiogram.types import FSInputFile, InlineKeyboardMarkup, CallbackQuery, Message
 
 from tgbot.mongo_db.db_api import files, subs, trial
 from tgbot.utils.get_image import get_next_image_filename
@@ -9,8 +10,23 @@ from tgbot.phrasebook.lexicon_ru import LEXICON_RU
 
 
 async def process_successful_re_subscription_payment(
-    call, end_date_str, support_keyboard, settings_keyboard
-):
+    call: CallbackQuery,
+    end_date_str: str,
+    support_keyboard: InlineKeyboardMarkup,
+    settings_keyboard: InlineKeyboardMarkup,
+) -> None:
+    """
+    Processes a successful re-subscription payment.
+
+    Args:
+        call (CallbackQuery): The incoming callback query.
+        end_date_str (str): The end date of the subscription.
+        support_keyboard (InlineKeyboardMarkup): The support keyboard.
+        settings_keyboard (InlineKeyboardMarkup): The settings keyboard.
+
+    Returns:
+        None
+    """
     user_id = call.from_user.id
     date = datetime.now()
     user_data = await files.find_one({"user_id": user_id})
@@ -79,8 +95,23 @@ async def process_successful_re_subscription_payment(
 
 
 async def process_successful_first_subscription_payment(
-    call, end_date_str, support_keyboard, settings_keyboard
-):
+    call: CallbackQuery,
+    end_date_str: str,
+    support_keyboard: InlineKeyboardMarkup,
+    settings_keyboard: InlineKeyboardMarkup,
+) -> None:
+    """
+    Processes a successful first subscription payment.
+
+    Args:
+        call (CallbackQuery): The incoming callback query..
+        end_date_str (str): The end date of the subscription.
+        support_keyboard (InlineKeyboardMarkup): The support keyboard.
+        settings_keyboard (InlineKeyboardMarkup): The settings keyboard.
+
+    Returns:
+        None
+    """
     user_id = call.from_user.id
     date: datetime = datetime.now()
 
@@ -124,8 +155,25 @@ async def process_successful_first_subscription_payment(
 
 
 async def process_trial_subscription(
-    query, settings_keyboard, client_id, image_filename, pk
-):
+    query: Union[Message, CallbackQuery],
+    settings_keyboard: InlineKeyboardMarkup,
+    client_id: str,
+    image_filename: str,
+    pk: str,
+) -> None:
+    """
+    Processes a trial subscription.
+
+    Args:
+        query (Union[Message, CallbackQuery]): The query object representing the message.
+        settings_keyboard (InlineKeyboardMarkup): The settings keyboard.
+        client_id (str): The client ID.
+        image_filename (str): The image filename.
+        pk (str): The package ID.
+
+    Returns:
+        None
+    """
     user_id: int = query.from_user.id
     date: datetime = datetime.now()
 

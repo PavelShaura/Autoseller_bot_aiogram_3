@@ -3,6 +3,7 @@ from tgbot.config import config
 
 
 # Docs: https://github.com/AlekseyKorshuk/yoomoney-api
+
 Authorize(
     client_id=config.misc.client_id,
     redirect_uri=config.misc.redirect_url,

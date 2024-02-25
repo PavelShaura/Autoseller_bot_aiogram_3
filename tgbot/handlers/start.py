@@ -7,20 +7,26 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from pymongo.errors import DuplicateKeyError
 
-
 from tgbot.mongo_db.db_api import users
 from tgbot.phrasebook.lexicon_ru import LEXICON_RU
 from tgbot.keyboards.inline import choose_payment
-
 from tgbot.keyboards.reply import menu_keyboard, choose_plan_keyboard
-
 
 start_router = Router()
 
 
 @start_router.callback_query(F.data == "to_menu")
 @start_router.message(CommandStart(), flags={"throttling_key": "default"})
-async def user_start(query: Union[Message, CallbackQuery]):
+async def user_start(query: Union[Message, CallbackQuery]) -> None:
+    """
+    Handles the start command or callback query "to_menu".
+
+    Args:
+        query (Union[Message, CallbackQuery]): The incoming message or callback query.
+
+    Returns:
+        None
+    """
     message: Message = query if isinstance(query, Message) else query.message
     await message.answer(text=LEXICON_RU["menu"], reply_markup=menu_keyboard)
     _id: int = message.from_user.id
@@ -40,9 +46,20 @@ async def user_start(query: Union[Message, CallbackQuery]):
         pass
 
 
+@start_router.callback_query(F.data == "prolong")
 @start_router.message(F.text == "Оплатить")
-async def choose_pay_method(query: Message):
-    await query.answer(text="Выберите тариф! ⤵️", reply_markup=choose_plan_keyboard)
+async def choose_pay_method(query: Union[Message, CallbackQuery]) -> None:
+    """
+    Handles the callback query "prolong" or message with text "Оплатить".
+
+    Args:
+        query (Union[Message, CallbackQuery]): The incoming message or callback query.
+
+    Returns:
+        None
+    """
+    message: Message = query if isinstance(query, Message) else query.message
+    await message.answer(text="Выберите тариф! ⤵️", reply_markup=choose_plan_keyboard)
 
 
 @start_router.message(
@@ -54,7 +71,17 @@ async def choose_pay_method(query: Message):
         }
     ),
 )
-async def choose_plan(query: Message, state: FSMContext):
+async def choose_plan(query: Message, state: FSMContext) -> None:
+    """
+    Handles the message with text corresponding to a subscription plan.
+
+    Args:
+        query (Message): The incoming message.
+        state (FSMContext): The FSMContext object.
+
+    Returns:
+        None
+    """
     data = query.text.split()
 
     current_price = data[4]

@@ -1,7 +1,6 @@
+from aiogram.types import CallbackQuery
 from pymongo import ReturnDocument
-
 from datetime import datetime, timedelta
-
 from tgbot.keyboards.inline import support_keyboard, settings_keyboard
 from tgbot.mongo_db.db_api import trial, payments, subs
 from tgbot.yoomoneylogic.successful_payment_logic import (
@@ -9,11 +8,24 @@ from tgbot.yoomoneylogic.successful_payment_logic import (
     process_successful_first_subscription_payment,
 )
 
+# Dictionary mapping subscription amounts to subscription durations in days
+SUBSCRIBE_TIMELINE: dict[float, int] = {582.0: 90, 873.0: 180, 1309.5: 365}
 
-SUBSCRIBE_TIMELINE = {582.0: 90, 873.0: 180, 1309.5: 365}
 
+async def process_check_payment_and_subscription(
+    call: CallbackQuery, user_id: int, amount: float
+) -> None:
+    """
+    Processes the payment and subscription for a user after a successful payment.
 
-async def process_check_payment_and_subscription(call, user_id, amount):
+    Args:
+        call (CallbackQuery): The incoming callback query.
+        user_id (int): The ID of the user.
+        amount (float): The amount of the payment.
+
+    Returns:
+        None
+    """
     trials: dict = trial.find_one(filter={"user_id": user_id})
 
     try:
@@ -26,7 +38,7 @@ async def process_check_payment_and_subscription(call, user_id, amount):
     except Exception as e:
         print(e)
 
-    now = datetime.now()
+    now: datetime = datetime.now()
 
     payments.insert_one(
         {
