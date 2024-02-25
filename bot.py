@@ -108,7 +108,7 @@ async def main():
 
     register_global_middlewares(dp, config)
 
-    await services.set_default_commands(bot)
+    await services.set_main_menu(bot)
 
     await on_startup(bot, config.tg_bot.admin_ids)
     await dp.start_polling(bot)

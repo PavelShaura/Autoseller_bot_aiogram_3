@@ -25,7 +25,7 @@ async def start_periodic_check(call, chat_id, uniqid, user_id, amount):
 
     # Вычисляем разницу во времени
     time_diff = now - first_check_time
-    delete_after = timedelta(seconds=30)
+    delete_after = timedelta(hours=1)
 
     current_status, crypto_hash = check_order_status(
         config.tg_bot.selix_api_key, uniqid
