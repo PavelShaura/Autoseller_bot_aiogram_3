@@ -1,9 +1,10 @@
 import logging
+from typing import Union
 
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from pymongo.errors import DuplicateKeyError
 
 
@@ -17,8 +18,10 @@ from tgbot.keyboards.reply import menu_keyboard, choose_plan_keyboard
 start_router = Router()
 
 
+@start_router.callback_query(F.data == "to_menu")
 @start_router.message(CommandStart(), flags={"throttling_key": "default"})
-async def user_start(message: Message):
+async def user_start(query: Union[Message, CallbackQuery]):
+    message: Message = query if isinstance(query, Message) else query.message
     await message.answer(text=LEXICON_RU["menu"], reply_markup=menu_keyboard)
     _id: int = message.from_user.id
     name: str = message.from_user.full_name

@@ -27,7 +27,7 @@ async def start_periodic_check(call, chat_id, uniqid, user_id, amount):
     time_diff = now - first_check_time
     delete_after = timedelta(hours=1)
 
-    current_status, crypto_hash = check_order_status(
+    current_status, crypto_hash = await check_order_status(
         config.tg_bot.selix_api_key, uniqid
     )
     if current_status:
@@ -64,7 +64,7 @@ async def start_periodic_check(call, chat_id, uniqid, user_id, amount):
                 )
 
         if last_status == "PENDING" and time_diff > delete_after:
-            success, message = delete_sellix_order(config.tg_bot.selix_api_key, uniqid)
+            success, message = await delete_sellix_order(config.tg_bot.selix_api_key, uniqid)
             if success:
                 await call.message.answer(
                     text=f"Заказ <code>{uniqid}</code> был автоматически отменен из-за таймаута.",

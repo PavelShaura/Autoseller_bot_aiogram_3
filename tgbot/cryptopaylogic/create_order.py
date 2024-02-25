@@ -3,7 +3,7 @@ import logging
 import requests
 
 
-def create_order(api_key, gateway, value):
+async def create_order(api_key, gateway, value):
     endpoint = "https://dev.sellix.io/v1/payments"
     payload = {
         "title": "License Key",

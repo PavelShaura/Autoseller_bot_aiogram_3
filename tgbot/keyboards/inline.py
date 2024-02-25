@@ -89,3 +89,13 @@ status_or_cancel_payment_bitcoin = InlineKeyboardMarkup(
         ]
     ]
 )
+
+back_to_menu = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="Назад в меню", callback_data="to_menu"
+            )
+        ]
+    ]
+)

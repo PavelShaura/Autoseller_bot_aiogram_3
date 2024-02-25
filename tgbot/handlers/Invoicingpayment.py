@@ -20,7 +20,7 @@ from tgbot.mongo_db.db_api import subs
 from tgbot.phrasebook.lexicon_ru import TRANSACTIONS
 
 from tgbot.yoomoneylogic.yoomoney_api import PaymentYooMoney
-from tgbot.keyboards.inline import payment_keyboard, status_or_cancel_payment_bitcoin
+from tgbot.keyboards.inline import payment_keyboard, status_or_cancel_payment_bitcoin, back_to_menu
 
 invoicing_for_payment_router = Router()
 
@@ -100,12 +100,12 @@ async def invoicing_for_payment_bitcoin(call: CallbackQuery, state: FSMContext):
 
     gateway = "BITCOIN"
 
-    address, amount, uniqid, protocol, rub_value = create_order(
+    address, amount, uniqid, protocol, rub_value = await create_order(
         config.tg_bot.selix_api_key, gateway, value
     )
 
     await call.message.edit_text(
-        text=f"Оплата <b>{gateway}</b>  🪙\n\n{sub_text}"
+        text=f"Оплата <b>{gateway}</b>  🪙{sub_text}"
         f"Пополните <code>{amount}</code> <b>BTC</b>\n"
         f"<b>На кошелек:</b> \n<code>{address}</code>\n\n"
         f"<b>Ваш идентификатор заказа:</b> <code>{uniqid}</code>\n\n"
@@ -180,8 +180,7 @@ async def check_status_for_payment_bitcoin(
 
 @invoicing_for_payment_router.callback_query(
     F.data.contains("btc_cancel"),
-    StateFilter("waiting_bitcoin"),
-    flags={"throttling_key": "default"},
+    StateFilter("waiting_bitcoin")
 )
 async def cancel_payment_bitcoin(
     call: CallbackQuery,
@@ -201,12 +200,13 @@ async def cancel_payment_bitcoin(
         and order_details[USER_ID_INDEX] == user_id
     ):
         if order_details[STATUS_INDEX].upper() == "PENDING":
-            success, message = delete_sellix_order(config.tg_bot.selix_api_key, uniqid)
+            success, message = await delete_sellix_order(config.tg_bot.selix_api_key, uniqid)
             if success:
                 db_manager.update_order_status(uniqid, "Cancelled")
                 await call.message.answer(
                     f"Заказ <code>{uniqid}</code> был успешно отменен.",
                     parse_mode="HTML",
+                    reply_markup=back_to_menu
                 )
                 logging.info(
                     f"{username} - {user_id} Cancelled order {uniqid} -> successfully cancelled."

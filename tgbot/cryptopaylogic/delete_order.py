@@ -2,7 +2,7 @@ import logging
 import requests
 
 
-def delete_sellix_order(api_key, uniqid):
+async def delete_sellix_order(api_key, uniqid):
     url = f"https://dev.sellix.io/v1/payments/{uniqid}"
     headers = {"Authorization": f"Bearer {api_key}"}
 

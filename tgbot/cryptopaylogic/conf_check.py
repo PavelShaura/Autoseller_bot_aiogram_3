@@ -12,7 +12,7 @@ PLAN_INDEX = 7
 HASH_INDEX = 8
 
 
-def check_order_status(api_key, uniqid):
+async def check_order_status(api_key, uniqid):
     url = f"https://dev.sellix.io/v1/orders/{uniqid}"
     headers = {"Authorization": f"Bearer {api_key}"}
     status, crypto_hash = None, None
