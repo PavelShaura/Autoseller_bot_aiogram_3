@@ -53,7 +53,8 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext):
         scheduler.add_job(
             notification_payment_cleared,
             trigger="date",
-            run_date=datetime.now() + timedelta(seconds=10810),
+            # run_date=datetime.now() + timedelta(seconds=10810),# For production (time difference on the server -3 hours)
+            run_date=datetime.now() + timedelta(seconds=10),
             kwargs={
                 "bot": bot,
                 "chat_id": config.tg_bot.channel_id,

@@ -78,7 +78,7 @@ async def process_pay(query: Message, bot: Bot):
             scheduler.add_job(
                 notification_trial_taken,
                 trigger="date",
-                # run_date=datetime.now() + timedelta(seconds=10810),
+                # run_date=datetime.now() + timedelta(seconds=10810), # For production (time difference on the server -3 hours)
                 run_date=datetime.now() + timedelta(seconds=10),
                 kwargs={
                     "bot": bot,

@@ -51,7 +51,7 @@ async def invoicing_for_payment_bitcoin(call: CallbackQuery, state: FSMContext):
     )
 
     await call.message.edit_text(
-        text=f"Оплата <b>{gateway}</b>  🪙{sub_text}"
+        text=f"Оплата <b>{gateway}</b>  🪙\n\n{sub_text}"
         f"Пополните <code>{amount}</code> <b>BTC</b>\n"
         f"<b>На кошелек:</b> \n<code>{address}</code>\n\n"
         f"<b>Ваш идентификатор заказа:</b> <code>{uniqid}</code>\n\n"
