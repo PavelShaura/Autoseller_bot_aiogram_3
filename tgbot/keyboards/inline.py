@@ -27,10 +27,11 @@ def payment_keyboard(payment_id: str, invoice: str) -> InlineKeyboardMarkup:
             [InlineKeyboardButton(text="Оплатить", url=invoice)],
             [
                 InlineKeyboardButton(
-                    text=f"Проверить платеж",
+                    text="ПРОВЕРИТЬ ПЛАТЕЖ",
                     callback_data=f"check_payment:{payment_id}",
                 )
             ],
+            [InlineKeyboardButton(text="Назад в меню", callback_data="to_menu")]
         ]
     )
 
