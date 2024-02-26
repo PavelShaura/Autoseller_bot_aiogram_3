@@ -5,9 +5,12 @@
   <img src="https://github.com/PavelShaura/Autoseller_bot_aiogram_3/blob/master/img/bot_sample_gif.gif"/>
 </div>
 
+*Added ability to generate cryptocurrency invoices and track their confirmations before order fulfilment/
+(Used SQLite3 to store and manage cryptocurrency payment data)*
+## Link to bot:
 
-Added ability to generate cryptocurrency invoices and track their confirmations before order fulfilment/
-(Used SQLite3 to store and manage cryptocurrency payment data)
+https://t.me/instaViPN_bot
+
 ## New features:
 1. Cryptocurrency invoice generation: Generate cryptocurrency invoices via Sellix API directly from the Telegram bot.
 2. Confirmation Tracking: Wait for a predetermined number of confirmations before considering a payment complete.
