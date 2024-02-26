@@ -24,9 +24,9 @@ async def user_settings(query: Union[Message, CallbackQuery]):
 
     if not sub:
         await message.answer(text=LEXICON_RU["no_sub"])
-
-    await message.answer(
-        text=LEXICON_RU["yes_sub"],
-        disable_web_page_preview=True,
-        reply_markup=os_keyboard,
-    )
+    else:
+        await message.answer(
+            text=LEXICON_RU["yes_sub"],
+            disable_web_page_preview=True,
+            reply_markup=os_keyboard,
+        )
