@@ -8,12 +8,15 @@ class NoPaymentFound(Exception):
     """
     Exception raised when no payment is found.
     """
+
     pass
+
 
 class NotEnoughMoney(Exception):
     """
     Exception raised when there is not enough money.
     """
+
     pass
 
 

@@ -9,9 +9,9 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.callback_answer import CallbackAnswerMiddleware
 
 from tgbot import apscheduler
-from tgbot import handlers
 from tgbot import middlewares
 from tgbot import services
+from tgbot.handlers import routers
 
 logger = logging.getLogger(__name__)
 log_level = logging.INFO
@@ -43,18 +43,15 @@ def register_logger():
         datefmt=date_format,
         level=log_level,
     )
+    logger = logging.getLogger()
 
-    # Установка уровня логирования для корневого логгера
     logger.setLevel(log_level)
 
-    # Создание обработчика для записи логов в файл
-    log_file_path = os.path.join("logs", "bot.log")  # Путь к файлу логов
-    os.makedirs(
-        os.path.dirname(log_file_path), exist_ok=True
-    )  # Создание директории для файлов логов
+    log_file_path = os.path.join("logs", "bot.log")
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
     file_handler = RotatingFileHandler(
         log_file_path, maxBytes=10 * 1024 * 1024, backupCount=5
-    )  # Максимальный размер файла 10 МБ, хранится 5 файлов
+    )  # Maximum file size 10 MB, 5 files stored
     file_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=date_format))
     logger.addHandler(file_handler)
 
@@ -90,16 +87,9 @@ async def main():
         middlewares.SchedulerMiddleware(apscheduler.scheduler)
     )
 
-    for router in [
-        handlers.start_router,
-        handlers.support_router,
-        handlers.profile_router,
-        handlers.check_payment_router,
-        handlers.settings_router,
-        handlers.trial_router,
-        handlers.invoicing_for_payment_router,
-    ]:
+    for router in routers:
         dp.include_router(router)
+
     dp.message.filter(F.chat.type == "private")
     dp.callback_query.filter(F.message.chat.type == "private")
 

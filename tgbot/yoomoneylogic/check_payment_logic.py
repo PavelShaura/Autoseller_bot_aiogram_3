@@ -3,9 +3,11 @@ from pymongo import ReturnDocument
 from datetime import datetime, timedelta
 from tgbot.keyboards.inline import support_keyboard, settings_keyboard
 from tgbot.mongo_db.db_api import trial, payments, subs
-from tgbot.yoomoneylogic.successful_payment_logic import (
-    process_successful_re_subscription_payment,
+from tgbot.yoomoneylogic.successful_first_subscription_payment import (
     process_successful_first_subscription_payment,
+)
+from tgbot.yoomoneylogic.successful_re_subscription_payment import (
+    process_successful_re_subscription_payment,
 )
 
 # Dictionary mapping subscription amounts to subscription durations in days

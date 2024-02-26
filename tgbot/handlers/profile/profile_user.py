@@ -8,10 +8,10 @@ from tgbot.keyboards.inline import show_qr_keyboard
 from tgbot.keyboards.reply import choose_plan_keyboard
 from tgbot.mongo_db.db_api import subs
 
-profile_router = Router()
+profile_user_router = Router()
 
 
-@profile_router.message(F.text == "Профиль")
+@profile_user_router.message(F.text == "Профиль")
 async def process_profile(message: Message):
     user_id: int = message.from_user.id
     name: str = message.from_user.first_name

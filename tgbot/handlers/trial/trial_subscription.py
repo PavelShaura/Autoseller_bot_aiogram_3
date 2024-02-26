@@ -10,19 +10,20 @@ from tgbot.apscheduler.apscheduler import scheduler
 from tgbot.apscheduler.send_to_admin_group import notification_trial_taken
 from tgbot.config import config
 from tgbot.mongo_db.db_api import subs
-from tgbot.yoomoneylogic.successful_payment_logic import process_trial_subscription
 from tgbot.utils.get_trial_image import get_trial_image_filename
 from tgbot.keyboards.reply import choose_plan_keyboard
 from tgbot.keyboards.inline import (
     support_keyboard,
     settings_keyboard,
 )
+from tgbot.yoomoneylogic.trial_subscription_logic import process_trial_subscription
+
+trial_subscription_router = Router()
 
 
-trial_router = Router()
-
-
-@trial_router.message(F.text.in_({"🔥 АКЦИЯ!!! 🔥 ⏱ Пробный период на 3 дня"}))
+@trial_subscription_router.message(
+    F.text.in_({"🔥 АКЦИЯ!!! 🔥 ⏱ Пробный период на 3 дня"})
+)
 async def process_pay(query: Message, bot: Bot):
     user_id: int = query.from_user.id
     user = query.from_user.full_name

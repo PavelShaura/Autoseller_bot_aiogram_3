@@ -58,7 +58,7 @@ env.bak/
 venv.bak/
 
 # Pyre type checker
-btc_checker_DB.sqlite3
+db_btc_checker.sqlite3
 .pyre/
 .idea
 .env

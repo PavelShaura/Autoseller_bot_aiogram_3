@@ -16,10 +16,10 @@ from tgbot.yoomoneylogic.check_payment_logic import (
 from tgbot.yoomoneylogic.yoomoney_api import PaymentYooMoney, NoPaymentFound
 
 
-check_payment_router = Router()
+check_payment_u_money_router = Router()
 
 
-@check_payment_router.callback_query(
+@check_payment_u_money_router.callback_query(
     F.data.contains("check_payment"),
     StateFilter("check_payment"),
     flags={"throttling_key": "callback"},
