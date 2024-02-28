@@ -2,13 +2,12 @@ import os
 from typing import Generator
 
 
-# Path to the folder with the QR code that are given to the user
-image_folder: str = "tgbot/static_files/images_qr/"
-
-
-async def get_next_image_filename() -> Generator[str, None, None]:
+async def get_image_filename(image_folder: str) -> Generator[str, None, None]:
     """
-    Asynchronously generates the next image filename from the image_folder directory.
+    Asynchronously generates the next image filename from the specified image_folder directory.
+
+    Args:
+        image_folder (str): Path to the folder with the images.
 
     Yields:
         str: The next image filename.

@@ -16,7 +16,8 @@ class TgBot:
     admin_ids: list[int]
     channel_id: int
     selix_api_key: str
-
+    sub_image_folder: str
+    trial_image_folder: str
 
 @dataclass
 class Miscellaneous:
@@ -52,6 +53,8 @@ def load_config(path: str = ".env") -> Config:
             admin_ids=env.list("ADMINS", subcast=int),
             channel_id=env.int("CHANNEL_INFO_ID"),
             selix_api_key=env.str("SELLIX_API_KEY"),
+            sub_image_folder=env.str("SUB_IMAGE_FOLDER"),
+            trial_image_folder=env.str("TRIAL_IMAGE_FOLDER")
         ),
         db=DbConfig(
             host=env.str("DB_HOST"), port=env.int("DB_PORT"), name=env.str("DB_NAME")

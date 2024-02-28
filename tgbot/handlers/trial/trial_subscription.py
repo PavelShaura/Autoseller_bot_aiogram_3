@@ -10,7 +10,7 @@ from tgbot.apscheduler.apscheduler import scheduler
 from tgbot.apscheduler.send_to_admin_group import notification_trial_taken
 from tgbot.config import config
 from tgbot.mongo_db.db_api import subs
-from tgbot.utils.get_trial_image import get_trial_image_filename
+from tgbot.utils.get_trial_image import get_image_filename
 from tgbot.keyboards.reply import choose_plan_keyboard
 from tgbot.keyboards.inline import (
     support_keyboard,
@@ -50,7 +50,7 @@ async def process_pay(query: Message, bot: Bot):
         client_id = ""
         pk = ""
 
-        async for image in get_trial_image_filename():
+        async for image in get_image_filename(config.tg_bot.trial_image_folder):
             image_filename = image
             break
 
