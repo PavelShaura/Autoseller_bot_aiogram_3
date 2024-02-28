@@ -4,9 +4,9 @@ import os
 from aiogram.types import FSInputFile, InlineKeyboardMarkup, CallbackQuery
 
 from tgbot.mongo_db.db_api import files, subs
-from tgbot.utils.get_image import get_next_image_filename
+from tgbot.utils.get_image import get_image_filename
 from tgbot.phrasebook.lexicon_ru import LEXICON_RU
-
+from tgbot.config import config
 
 async def process_successful_re_subscription_payment(
     call: CallbackQuery,
@@ -39,7 +39,7 @@ async def process_successful_re_subscription_payment(
         client_id = ""
         pk = ""
 
-        async for image in get_next_image_filename():
+        async for image in get_image_filename(config.tg_bot.sub_image_folder):
             image_filename = image
             break
 
