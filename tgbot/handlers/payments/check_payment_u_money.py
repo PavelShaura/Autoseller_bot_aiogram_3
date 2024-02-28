@@ -63,3 +63,5 @@ async def check_payment(call: CallbackQuery, bot: Bot, state: FSMContext):
                 "username": username,
             },
         )
+    finally:
+        logging.info(f"User: {user} checking payment")
