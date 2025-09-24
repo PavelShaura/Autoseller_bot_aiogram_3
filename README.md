@@ -65,6 +65,7 @@ The ".conf" file is also written to the database (file_id) in the "files" table,
 </div>
 
 Questions and suggestions: https://t.me/PavelShaura @PavelShaura
+If you notice a bug or have suggestions, please feel free to report them.
 
 ## Start
 
